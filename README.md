@@ -1,2 +1,2 @@
 # TurtleResetWorld
-Minecraft plugin that resets the world 
+Minecraft plugin that resets worlds

@@ -1,0 +1,17 @@
+name: TurtleResetWorld
+version: 1.0.0 
+main: andrescol.turtleresetworld.TurtleResetWorldPlugin
+description: With this plugin you can reset automatically worlds
+author: [xX_andrescol_Xx]
+api-version: 1.16
+website: 
+commands:
+  turtle: 
+    description: Show the plugin info
+    permission-message: '[TurtleResetWorld] You dont haver permission for this command'
+    permission: turtleresetworld.info
+    usage: Incorrect usage, try /turtle <reload|player>
+permissions: 
+  turtleresetworld.info: {description: Allow to see the plugin info, default: op}
+      
+    
