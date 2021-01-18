@@ -2,7 +2,42 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>andrescol.turtleresetworld</groupId>
   <artifactId>TurtleResetWorld</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>TurtleResetWorld</name>
   <description>Minecraft plugin that resets the world</description>
+  
+  <properties>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+	</properties>
+
+	<dependencies>
+		<!-- Spogit API and javadocs -->
+		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>1.16.4-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>spigotmc-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+	</repositories>
 </project>
