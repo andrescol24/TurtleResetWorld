@@ -9,7 +9,7 @@ public class TurtleResetWorldPlugin extends APlugin{
 	
 	@Override
 	public void onEnable() {
-		this.getCommand("turtle").setExecutor(new TurtleResetWorldCommand(this));
+		this.getCommand("turtle").setExecutor(new TurtleResetWorldCommand());
 	}
 
 	@Override

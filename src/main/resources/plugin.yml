@@ -3,7 +3,7 @@ version: 1.0.0
 main: co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin
 description: With this plugin you can reset automatically worlds
 author: [xX_andrescol_Xx]
-api-version: 1.16
+api-version: 1.16 
 website: 
 commands:
   turtle: 
@@ -12,6 +12,7 @@ commands:
     permission: turtleresetworld.info
     usage: Incorrect usage, try /turtle regen <World name | all>
 permissions: 
-  turtleresetworld.info: {description: Allow to see the plugin info, default: op}
+  turtleresetworld.info: {description: Allows to see the plugin info, default: op}
+  turtleresetworld.regen: {description: Allows regen worlds, default: op}
       
     

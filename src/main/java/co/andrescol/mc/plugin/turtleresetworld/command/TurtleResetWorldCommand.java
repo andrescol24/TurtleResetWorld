@@ -1,37 +1,26 @@
 package co.andrescol.mc.plugin.turtleresetworld.command;
 
+import java.util.List;
+
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import co.andrescol.mc.library.configuration.ALanguageDirectAccess;
-import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin;
-import co.andrescol.mc.plugin.turtleresetworld.enums.MessageName;
+import co.andrescol.mc.library.command.AMainCommand;
 
-public class TurtleResetWorldCommand implements CommandExecutor {
+public class TurtleResetWorldCommand extends AMainCommand {
 
-	private final TurtleResetWorldPlugin plugin;
-
-	public TurtleResetWorldCommand(TurtleResetWorldPlugin plugin) {
-		this.plugin = plugin;
+	public TurtleResetWorldCommand() {
+		this.addSubCommand(new RegenWorldSubCommand());
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender.hasPermission(command.getPermission())) {
-			String message = ALanguageDirectAccess.getInstance().getMessage(MessageName.MESSAGE,
-					sender.getName());
-			String version = this.plugin.getConfig().getString("version");
-			this.plugin.info("the configuration: {}", version);
-			AUtils.sendMessage(sender, message, plugin);
-			if(args.length > 0) {
-				this.plugin.reload();
-				this.plugin.info("reloaded...");
-			}
-			return true;
-		}
-		return false;
+		return this.handle(sender, command, label, args);
+	}
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		return this.completeTab(sender, command, alias, args);
 	}
 
 }
