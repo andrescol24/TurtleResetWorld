@@ -1,1 +1,10 @@
 version: 1.0.0
+heroSofocation: 
+  enable: true
+  position:
+    x: 0
+    y: 0
+    z: 0
+    world: World
+
+  

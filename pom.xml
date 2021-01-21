@@ -1,17 +1,26 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>andrescol.turtleresetworld</groupId>
-  <artifactId>TurtleResetWorld</artifactId>
-  <version>1.0.0</version>
-  <name>TurtleResetWorld</name>
-  <description>Minecraft plugin that resets the world</description>
-  
-  <properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>co.andrescol.mc.plugin.turtleresetworld</groupId>
+	<artifactId>TurtleResetWorld</artifactId>
+	<version>1.0.0</version>
+	<name>TurtleResetWorld</name>
+	<description>Minecraft plugin that resets the world</description>
+
+	<properties>
 		<maven.compiler.target>11</maven.compiler.target>
 		<maven.compiler.source>11</maven.compiler.source>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>co.andrescol.mc.library</groupId>
+			<artifactId>AcolSpigotPluginsInitilizer</artifactId>
+			<version>1.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!-- Spogit API and javadocs -->
 		<dependency>
 			<groupId>org.spigotmc</groupId>
@@ -35,9 +44,23 @@
 			<id>spigotmc-repo</id>
 			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
-		<repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-		</repository>
 	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
