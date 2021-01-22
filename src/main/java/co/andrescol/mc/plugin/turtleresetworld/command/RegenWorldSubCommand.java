@@ -9,7 +9,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import co.andrescol.mc.library.command.ASubCommand;
-import co.andrescol.mc.library.utils.AUtils;
+import co.andrescol.mc.library.configuration.ALanguageDirectAccess;
+import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.listener.PlayerJoinListener;
 
 public class RegenWorldSubCommand extends ASubCommand {
 
@@ -23,12 +25,12 @@ public class RegenWorldSubCommand extends ASubCommand {
 		if (sender.hasPermission(this.getPermission())) {
 			String name = args.length == 2 ? args[1] : "";
 			List<World> worlds = Bukkit.getWorlds();
-			worlds.forEach(x ->{
-				if(x.getName().startsWith(name)) {
+			worlds.forEach(x -> {
+				if (x.getName().startsWith(name)) {
 					list.add(x.getName());
 				}
 			});
-			if("all".startsWith(name)) {
+			if ("all".startsWith(name)) {
 				list.add("all");
 			}
 		}
@@ -37,7 +39,15 @@ public class RegenWorldSubCommand extends ASubCommand {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		AUtils.sendMessage(sender, "Regeneration...");
+		// Add a listener to prevent player's join temporally
+		PlayerJoinListener listener = new PlayerJoinListener();
+		APlugin.getInstance().getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
+
+		// Kick all players
+		String message = ALanguageDirectAccess.getInstance().getMessage("kick_message_player_connected");
+		Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(message));
+		
+		
 		return true;
 	}
 
