@@ -15,5 +15,6 @@ public class TurtleResetWorldPlugin extends APlugin{
 	@Override
 	public void onDisable() {
 		HandlerList.unregisterAll(this);
+		this.getServer().getScheduler().cancelTasks(this);
 	}
 }
