@@ -3,7 +3,8 @@ package co.andrescol.mc.plugin.turtleresetworld.command.subcommand;
 import java.util.LinkedList;
 import java.util.List;
 
-import co.andrescol.mc.plugin.turtleresetworld.thread.ChunkCleanerTask;
+import co.andrescol.mc.library.utils.AUtils;
+import co.andrescol.mc.plugin.turtleresetworld.thread.ResetWorldThread;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -15,6 +16,8 @@ import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.listener.PlayerJoinListener;
 
 public class RegenWorldSubCommand extends ASubCommand {
+
+    public static final String PARAM_ALL = "all";
 
     public RegenWorldSubCommand() {
         super("regen", "turtleresetworld.regen");
@@ -30,7 +33,11 @@ public class RegenWorldSubCommand extends ASubCommand {
         String message = ALanguageDirectAccess.getInstance().getMessage("kick_message_player_connected");
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(message));
 
-        ChunkCleanerTask task = new ChunkCleanerTask(listener);
+        // Get Worlds to reset
+        String world = AUtils.getArgument(1, args);
+        List<World> worlds = PARAM_ALL.equals(world) ? Bukkit.getWorlds() : List.of(Bukkit.getWorld(world));
+
+        ResetWorldThread task = new ResetWorldThread(listener, worlds);
         task.runTaskAsynchronously(APlugin.getInstance());
         return true;
     }
