@@ -39,12 +39,24 @@ public class ResetWorldThread extends BukkitRunnable {
      * @param world world which will be to reset
      */
     private void resetWorld(World world) {
+        APlugin.getInstance().info("Starting {} regeneration...", world);
         File worldDirectory = world.getWorldFolder();
-        File regionFolder = new File(worldDirectory, "region");
+        String regionPath;
+        switch (world.getEnvironment()) {
+            case NETHER:
+                regionPath = "DIM-1" + File.separator + "region";
+                break;
+            case THE_END:
+                regionPath = "DIM1" + File.separator + "region";
+                break;
+            default:
+                regionPath = "region";
+        }
+        File regionFolder = new File(worldDirectory, regionPath);
         if (regionFolder.exists()) {
             for (File file : regionFolder.listFiles()) {
-                APlugin.getInstance().info("Deleting {} for {} regeneration",
-                        file.getAbsolutePath(), world.getName());
+                APlugin.getInstance().info("Deleting {}",
+                        file.getName());
             }
         } else {
             APlugin.getInstance().warn("The region {} file doesn't exist", regionFolder.getAbsolutePath());
