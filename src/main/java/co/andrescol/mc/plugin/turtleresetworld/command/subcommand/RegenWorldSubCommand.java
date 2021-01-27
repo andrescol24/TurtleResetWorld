@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.thread.ResetWorldThread;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.ClearRegionsRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -26,19 +26,22 @@ public class RegenWorldSubCommand extends ASubCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         // Add a listener to prevent player's join temporally
+        APlugin plugin = APlugin.getInstance();
+        plugin.info("Starting worlds regeneration");
+
         PlayerJoinListener listener = new PlayerJoinListener();
-        APlugin.getInstance().getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
+        plugin.getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
 
         // Kick all players
         String message = ALanguageDirectAccess.getInstance().getMessage("kick_message_player_connected");
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(message));
 
         // Get Worlds to reset
-        String world = AUtils.getArgument(1, args);
-        List<World> worlds = PARAM_ALL.equals(world) ? Bukkit.getWorlds() : List.of(Bukkit.getWorld(world));
+        String worldParam = AUtils.getArgument(1, args);
+        List<World> worlds = PARAM_ALL.equals(worldParam) ? Bukkit.getWorlds() : List.of(Bukkit.getWorld(worldParam));
 
-        ResetWorldThread task = new ResetWorldThread(listener, worlds);
-        task.runTaskAsynchronously(APlugin.getInstance());
+        ClearRegionsRunnable runnable = new ClearRegionsRunnable(worlds);
+        runnable.runTaskAsynchronously(plugin);
         return true;
     }
 
