@@ -1,10 +1,12 @@
 version: 1.0.0
-heroSofocation: 
+safeOfSuffocation:
   enable: true
   position:
     x: 0
-    y: 0
+    y: 70
     z: 0
-    world: World
+    world: world
+# This field is auto generated before a regeneration
+lastRegenDate: null
 
   

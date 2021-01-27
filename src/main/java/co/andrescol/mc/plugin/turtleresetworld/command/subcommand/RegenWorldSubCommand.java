@@ -11,9 +11,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
 import co.andrescol.mc.library.command.ASubCommand;
-import co.andrescol.mc.library.configuration.ALanguageDirectAccess;
+import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.listener.PlayerJoinListener;
+import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
 
 public class RegenWorldSubCommand extends ASubCommand {
 
@@ -25,15 +25,15 @@ public class RegenWorldSubCommand extends ASubCommand {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // Add a listener to prevent player's join temporally
         APlugin plugin = APlugin.getInstance();
         plugin.info("Starting worlds regeneration");
 
-        PlayerJoinListener listener = new PlayerJoinListener();
+        // Add a listener to prevent player's join temporally
+        AntiPlayerJoinListener listener = new AntiPlayerJoinListener();
         plugin.getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
 
         // Kick all players
-        String message = ALanguageDirectAccess.getInstance().getMessage("kick_message_player_connected");
+        String message = ALanguage.getMessage("KICK_MESSAGE");
         Bukkit.getOnlinePlayers().forEach(player -> player.kickPlayer(message));
 
         // Get Worlds to reset

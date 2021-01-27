@@ -6,6 +6,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 public class ClearRegionsRunnable extends BukkitRunnable {
 
@@ -38,14 +39,15 @@ public class ClearRegionsRunnable extends BukkitRunnable {
      */
     private void resetWorld(World world) {
         APlugin plugin = APlugin.getInstance();
-        plugin.info("Starting {} regeneration...", world.getName());
+        plugin.info("Starting {} regeneration", world.getName());
 
         File worldDirectory = world.getWorldFolder();
         String regionPath = this.getRegionFolder(world);
 
         File regionFolder = new File(worldDirectory, regionPath);
         if (regionFolder.exists()) {
-            for (File file : regionFolder.listFiles()) {
+            File[] files = Objects.requireNonNull(regionFolder.listFiles());
+            for (File file : files) {
                 boolean deleted = file.delete();
                 if (!deleted) {
                     plugin.warn("The region file {} for world {} couldn't be deleted", file.getName(), world.getName());

@@ -5,13 +5,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import co.andrescol.mc.library.configuration.ALanguageDirectAccess;
+import co.andrescol.mc.library.configuration.ALanguage;
 
-public class PlayerJoinListener implements Listener{
+public class AntiPlayerJoinListener implements Listener{
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		String message = ALanguageDirectAccess.getInstance().getMessage("kick_message");
+		String message = ALanguage.getMessage("KICK_MESSAGE");
 		Player player = event.getPlayer();
 		player.kickPlayer(message);
 	}

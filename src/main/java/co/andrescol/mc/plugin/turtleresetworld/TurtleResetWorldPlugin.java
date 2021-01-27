@@ -1,5 +1,6 @@
 package co.andrescol.mc.plugin.turtleresetworld;
 
+import co.andrescol.mc.plugin.turtleresetworld.listener.AntiSuffocationPLayerJoinListener;
 import org.bukkit.event.HandlerList;
 
 import co.andrescol.mc.library.plugin.APlugin;
@@ -10,6 +11,10 @@ public class TurtleResetWorldPlugin extends APlugin{
 	@Override
 	public void onEnable() {
 		this.getCommand("turtle").setExecutor(new TurtleResetWorldCommand());
+		if(this.getConfig().getBoolean("safeOfSuffocation.enable")) {
+			AntiSuffocationPLayerJoinListener listener = new AntiSuffocationPLayerJoinListener();
+			this.getServer().getPluginManager().registerEvents(listener, this);
+		}
 	}
 
 	@Override
