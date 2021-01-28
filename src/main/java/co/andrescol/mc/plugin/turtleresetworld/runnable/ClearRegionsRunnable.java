@@ -6,6 +6,7 @@ import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
 import co.andrescol.mc.plugin.turtleresetworld.objects.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;

@@ -65,6 +65,6 @@ public class Region {
 
     @Override
     public String toString() {
-        return String.format("{x: %d, z: %d, file: %s}", this.x, this.z, this.file.getAbsolutePath());
+        return String.format("x: %d, z: %d, file: %s", this.x, this.z, this.file.getName());
     }
 }
