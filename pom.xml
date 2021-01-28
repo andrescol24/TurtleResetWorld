@@ -14,6 +14,7 @@
 	</properties>
 
 	<dependencies>
+		<!-- Local dependency -->
 		<dependency>
 			<groupId>co.andrescol.mc.library</groupId>
 			<artifactId>AcolSpigotPluginsInitilizer</artifactId>
@@ -21,7 +22,15 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- Spogit API and javadocs -->
+		<!-- Local dependency with mvn install:install-file-->
+		<dependency>
+			<groupId>com.griefprevention</groupId>
+			<artifactId>GriefPrevention</artifactId>
+			<version>16.17.1</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Spigot API and javadocs -->
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>

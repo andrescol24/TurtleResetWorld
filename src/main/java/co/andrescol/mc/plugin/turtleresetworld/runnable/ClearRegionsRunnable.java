@@ -1,10 +1,15 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
+import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
+import co.andrescol.mc.plugin.turtleresetworld.objects.Region;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,8 +28,10 @@ public class ClearRegionsRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
+        List<Claimer> claimers = this.chargeHooks();
+
         for (World world : this.worlds) {
-            this.resetWorld(world);
+            this.resetWorld(world, claimers);
         }
 
         // Run in the main thread
@@ -35,9 +42,10 @@ public class ClearRegionsRunnable extends BukkitRunnable {
     /**
      * Resets the world
      *
-     * @param world world which will be to reset
+     * @param world    world which will be to reset
+     * @param claimers Claimers than protect chunks
      */
-    private void resetWorld(World world) {
+    private void resetWorld(World world, List<Claimer> claimers) {
         APlugin plugin = APlugin.getInstance();
         plugin.info("Starting {} regeneration", world.getName());
 
@@ -48,18 +56,36 @@ public class ClearRegionsRunnable extends BukkitRunnable {
         if (regionFolder.exists()) {
             File[] files = Objects.requireNonNull(regionFolder.listFiles());
             for (File file : files) {
-                boolean deleted = file.delete();
-                if (!deleted) {
-                    plugin.warn("The region file {} for world {} couldn't be deleted", file.getName(), world.getName());
-                }
+                this.cleanRegion(file, claimers);
             }
         } else {
             plugin.warn("The region {} file doesn't exist", regionFolder.getAbsolutePath());
         }
     }
 
+    private void cleanRegion(File regionFile, List<Claimer> claimers) {
+        try {
+            Region region = new Region(regionFile);
+            if (region.hasClaimedChunks(claimers)) {
+                APlugin.getInstance().info("The region {} has claimed chunks", region);
+            } else {
+                boolean deleted = region.deleteFile();
+                if (!deleted) {
+                    APlugin.getInstance().warn("The region file {} couldn't be deleted", regionFile.getName());
+                } else {
+                    APlugin.getInstance().info("Region {} deleted!", region);
+                }
+            }
+        } catch (IllegalStateException e) {
+            APlugin.getInstance().error("The region file couldn't be deleted", e);
+        } catch (Exception e) {
+            APlugin.getInstance().error("The region file {} couldn't be deleted", e, regionFile.getName());
+        }
+    }
+
     /**
      * Get the region folder for the world
+     *
      * @param world world
      * @return The relative folder path
      */
@@ -72,5 +98,19 @@ public class ClearRegionsRunnable extends BukkitRunnable {
             default:
                 return "region";
         }
+    }
+
+    /**
+     * Charges the hooks
+     *
+     * @return list of claimers for protect chunks claimed
+     */
+    private List<Claimer> chargeHooks() {
+        List<Claimer> claimers = new LinkedList<>();
+        if (Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
+            APlugin.getInstance().info("There is GriefPrevention plugin!");
+            claimers.add(new GriefPreventionClaimer());
+        }
+        return claimers;
     }
 }
