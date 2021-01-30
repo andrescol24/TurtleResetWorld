@@ -3,6 +3,7 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
+import co.andrescol.mc.plugin.turtleresetworld.objects.ChunkRegion;
 import co.andrescol.mc.plugin.turtleresetworld.objects.Region;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -65,22 +66,26 @@ public class ClearRegionsRunnable extends BukkitRunnable {
     }
 
     private void cleanRegion(File regionFile, List<Claimer> claimers) {
+        APlugin plugin = APlugin.getInstance();
         try {
             Region region = new Region(regionFile);
             if (region.hasClaimedChunks(claimers)) {
-                APlugin.getInstance().info("The region {} has claimed chunks", region);
+                plugin.info("The region {} has claimed chunks", region);
+                List<ChunkRegion> removed = region.removeUnClaimedChunks(claimers);
+                plugin.info("Chunks removed {}", removed);
+                region.saveFile();
             } else {
                 boolean deleted = region.deleteFile();
                 if (!deleted) {
-                    APlugin.getInstance().warn("The region file {} couldn't be deleted", regionFile.getName());
+                    plugin.warn("The region file {} couldn't be deleted", regionFile.getName());
                 } else {
-                    APlugin.getInstance().info("Region {} deleted!", region);
+                    plugin.info("Region {} deleted!", region);
                 }
             }
         } catch (IllegalStateException e) {
-            APlugin.getInstance().error("The region file couldn't be deleted", e);
+            plugin.error("The region file couldn't be deleted", e);
         } catch (Exception e) {
-            APlugin.getInstance().error("The region file {} couldn't be deleted", e, regionFile.getName());
+            plugin.error("The region file {} couldn't be deleted", e, regionFile.getName());
         }
     }
 
