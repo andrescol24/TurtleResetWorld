@@ -3,11 +3,10 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
-import co.andrescol.mc.plugin.turtleresetworld.objects.ChunkRegion;
-import co.andrescol.mc.plugin.turtleresetworld.objects.Region;
+import co.andrescol.mc.plugin.turtleresetworld.objects.RegionInFile;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
@@ -51,6 +50,16 @@ public class ClearRegionsRunnable extends BukkitRunnable {
         APlugin plugin = APlugin.getInstance();
         plugin.info("Starting {} regeneration", world.getName());
 
+        // Filter claimed chunks by world
+        List<Chunk> protectedChunk = new LinkedList<>();
+        for(Claimer claimer : claimers) {
+            for(Chunk chunk : claimer.getClaimedChunks()) {
+                if(chunk.getWorld().equals(world)) {
+                    protectedChunk.add(chunk);
+                }
+            }
+        }
+
         File worldDirectory = world.getWorldFolder();
         String regionPath = this.getRegionFolder(world);
 
@@ -58,22 +67,20 @@ public class ClearRegionsRunnable extends BukkitRunnable {
         if (regionFolder.exists()) {
             File[] files = Objects.requireNonNull(regionFolder.listFiles());
             for (File file : files) {
-                this.cleanRegion(file, claimers);
+                this.cleanRegion(file, protectedChunk);
             }
         } else {
             plugin.warn("The region {} file doesn't exist", regionFolder.getAbsolutePath());
         }
     }
 
-    private void cleanRegion(File regionFile, List<Claimer> claimers) {
+    private void cleanRegion(File regionFile, List<Chunk> protectedChunks) {
         APlugin plugin = APlugin.getInstance();
         try {
-            Region region = new Region(regionFile);
-            if (region.hasClaimedChunks(claimers)) {
+            RegionInFile region = new RegionInFile(regionFile, protectedChunks);
+            if (region.hasClaimedChunks()) {
                 plugin.info("The region {} has claimed chunks", region);
-                List<ChunkRegion> removed = region.removeUnClaimedChunks(claimers);
-                plugin.info("Chunks removed {}", removed);
-                region.saveFile();
+                region.removeUnClaimedChunksInFile();
             } else {
                 boolean deleted = region.deleteFile();
                 if (!deleted) {
