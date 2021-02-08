@@ -1,10 +1,16 @@
 package co.andrescol.mc.plugin.turtleresetworld;
 
+import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
+import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiSuffocationPLayerJoinListener;
+import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.command.TurtleResetWorldCommand;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TurtleResetWorldPlugin extends APlugin{
 	
@@ -21,5 +27,19 @@ public class TurtleResetWorldPlugin extends APlugin{
 	public void onDisable() {
 		HandlerList.unregisterAll(this);
 		this.getServer().getScheduler().cancelTasks(this);
+	}
+
+	/**
+	 * Charges the hooks
+	 *
+	 * @return list of claimers for protect chunks claimed
+	 */
+	public static List<Claimer> getHooks() {
+		List<Claimer> claimers = new LinkedList<>();
+		if (Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
+			APlugin.getInstance().info("There is GriefPrevention plugin!");
+			claimers.add(new GriefPreventionClaimer());
+		}
+		return claimers;
 	}
 }
