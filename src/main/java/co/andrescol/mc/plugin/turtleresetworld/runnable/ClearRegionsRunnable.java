@@ -1,6 +1,7 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
 import co.andrescol.mc.plugin.turtleresetworld.objects.RegionInFile;
@@ -29,7 +30,7 @@ public class ClearRegionsRunnable extends BukkitRunnable {
 
     @Override
     public void run() {
-        List<Claimer> claimers = this.chargeHooks();
+        List<Claimer> claimers = TurtleResetWorldPlugin.getHooks();
 
         for (World world : this.worlds) {
             this.resetWorld(world, claimers);
@@ -111,19 +112,5 @@ public class ClearRegionsRunnable extends BukkitRunnable {
             default:
                 return "region";
         }
-    }
-
-    /**
-     * Charges the hooks
-     *
-     * @return list of claimers for protect chunks claimed
-     */
-    private List<Claimer> chargeHooks() {
-        List<Claimer> claimers = new LinkedList<>();
-        if (Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
-            APlugin.getInstance().info("There is GriefPrevention plugin!");
-            claimers.add(new GriefPreventionClaimer());
-        }
-        return claimers;
     }
 }

@@ -108,14 +108,15 @@ public class RegionInFile {
 
                 // location == 0 means that the chunk isn't charged
                 if (location != 0) {
+                    long positionFile = (long) (location >> 8) * SECTOR_SIZE;
+                    raf.seek(positionFile);
+
                     // Reading the chunk data
                     int chunkSize = raf.readInt();
                     chunkRegion.setChunkSize(chunkSize);
 
-                    long positionFile = (long) (location >> 8) * SECTOR_SIZE;
-                    raf.seek(positionFile);
-                    byte[] data = new byte[chunkSize-4];
-                    raf.readFully(data, 0, chunkSize-4);
+                    byte[] data = new byte[chunkSize];
+                    raf.readFully(data, 0, chunkSize);
                     chunkRegion.setData(data);
                     this.chunksInFile.add(chunkRegion);
                 }
