@@ -11,6 +11,8 @@ import org.bukkit.WorldCreator;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.LazyMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.LinkedList;
@@ -54,6 +56,11 @@ public class CloneWorldSubCommand extends ASubCommand {
                                 for(int x = 0; x < 16; x++) {
                                     for(int z = 0; z < 16; z++) {
                                         Block block = chunk.getBlock(x, y, z);
+                                        for(LazyMetadataValue.CacheStrategy metadata : LazyMetadataValue.CacheStrategy.values()) {
+                                            if(block.hasMetadata(metadata.name())) {
+                                                APlugin.getInstance().info("The block {} has the {} metadata", block, metadata);
+                                            }
+                                        }
                                         newChunk.getBlock(x, y, z).setBlockData(block.getBlockData());
                                     }
                                 }

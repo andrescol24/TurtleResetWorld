@@ -27,7 +27,7 @@
 			<groupId>com.griefprevention</groupId>
 			<artifactId>GriefPrevention</artifactId>
 			<version>16.17.1</version>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Spigot API and javadocs -->
@@ -69,6 +69,16 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<filters>
+						<filter>
+							<artifact>co.andrescol.mc.library:AcolSpigotPluginsInitilizer</artifact>
+							<includes>
+								<include>co/**</include>
+							</includes>
+						</filter>
+					</filters>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
