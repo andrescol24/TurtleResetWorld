@@ -4,13 +4,14 @@ import co.andrescol.mc.library.command.ASubCommand;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.LazyMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -30,22 +31,24 @@ public class CloneWorldSubCommand extends ASubCommand {
         World world = Bukkit.getWorld(worldName);
 
         // Create world
-        WorldCreator creator = new WorldCreator("cloneOf_" + worldName)
-                .environment(world.getEnvironment()).seed(world.getSeed());
-        World clone = creator.createWorld();
-
-        List<Claimer> claimers = TurtleResetWorldPlugin.getHooks();
-        for(Claimer claimer : claimers) {
-            for(Chunk chunk : claimer.getClaimedChunks()) {
-                if(chunk.getWorld().equals(world)) {
-                    clone.loadChunk(chunk.getX(), chunk.getZ());
-                }
-            }
-        }
-
         new BukkitRunnable() {
             @Override
             public void run() {
+                WorldCreator creator = new WorldCreator("cloneOf_" + worldName)
+                        .environment(world.getEnvironment()).seed(world.getSeed());
+                World clone = creator.createWorld();
+
+                List<Claimer> claimers = TurtleResetWorldPlugin.getHooks();
+
+                APlugin.getInstance().info("Loading chunks...");
+                for(Claimer claimer : claimers) {
+                    for(Chunk chunk : claimer.getClaimedChunks()) {
+                        if(chunk.getWorld().equals(world)) {
+                            clone.loadChunk(chunk.getX(), chunk.getZ());
+                        }
+                    }
+                }
+
                 APlugin.getInstance().info("Copying blocks...");
                 for(Claimer claimer : claimers) {
                     for(Chunk chunk : claimer.getClaimedChunks()) {
@@ -56,14 +59,36 @@ public class CloneWorldSubCommand extends ASubCommand {
                                 for(int x = 0; x < 16; x++) {
                                     for(int z = 0; z < 16; z++) {
                                         Block block = chunk.getBlock(x, y, z);
-                                        for(LazyMetadataValue.CacheStrategy metadata : LazyMetadataValue.CacheStrategy.values()) {
-                                            if(block.hasMetadata(metadata.name())) {
-                                                APlugin.getInstance().info("The block {} has the {} metadata", block, metadata);
-                                            }
+
+                                        // Coping block data
+                                        BlockData data = block.getBlockData();
+                                        Block newBlock = newChunk.getBlock(x, y, z);
+                                        newBlock.setBlockData(data);
+
+                                        // Coping block state
+                                        BlockState state = block.getState();
+                                        newBlock.getState().setData(state.getData());
+
+                                        if(state instanceof Container) {
+                                            Container newContainer = (Container) newBlock.getState();
+                                            Container oldContainer = (Container) state;
+                                            newContainer.getInventory().setContents(oldContainer.getInventory().getContents());
+                                            newContainer.setCustomName(oldContainer.getCustomName());
                                         }
-                                        newChunk.getBlock(x, y, z).setBlockData(block.getBlockData());
+
+                                        if(state instanceof Nameable) {
+                                            Nameable newNameable = (Nameable) newBlock.getState();
+                                            Nameable oldNameable = (Nameable) state;
+                                            newNameable.setCustomName(oldNameable.getCustomName());
+                                        }
                                     }
                                 }
+                            }
+                            APlugin.getInstance().info("Moving entities");
+                            for(Entity entity : chunk.getEntities()) {
+                                Location entityLocation = entity.getLocation();
+                                entityLocation.setWorld(clone);
+                                entity.teleport(entityLocation);
                             }
                         }
                     }
@@ -71,7 +96,6 @@ public class CloneWorldSubCommand extends ASubCommand {
                 APlugin.getInstance().info("Copying blocks finished");
             }
         }.runTask(APlugin.getInstance());
-
         return true;
     }
 

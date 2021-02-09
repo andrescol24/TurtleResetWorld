@@ -13,6 +13,7 @@ public class ChunkInFile {
     // File data
     private byte[] data;
     private int chunkSize;
+    private byte compressionType;
 
     public ChunkInFile(int x, int z, boolean protectedChunk) {
         this.x = x;
@@ -51,6 +52,14 @@ public class ChunkInFile {
 
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
+    }
+
+    public byte getCompressionType() {
+        return compressionType;
+    }
+
+    public void setCompressionType(byte compressionType) {
+        this.compressionType = compressionType;
     }
 
     @Override

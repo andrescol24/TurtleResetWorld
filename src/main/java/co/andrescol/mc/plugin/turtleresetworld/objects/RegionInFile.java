@@ -115,8 +115,11 @@ public class RegionInFile {
                     int chunkSize = raf.readInt();
                     chunkRegion.setChunkSize(chunkSize);
 
-                    byte[] data = new byte[chunkSize];
-                    raf.readFully(data, 0, chunkSize);
+                    byte compressionType = raf.readByte();
+                    chunkRegion.setCompressionType(compressionType);
+
+                    byte[] data = new byte[chunkSize-1];
+                    raf.readFully(data, 0, chunkSize-1);
                     chunkRegion.setData(data);
                     this.chunksInFile.add(chunkRegion);
                 }
@@ -159,6 +162,7 @@ public class RegionInFile {
 
         for(ChunkInFile chunk : listInOrder) {
             raf.write(chunk.getChunkSize());
+            raf.write(chunk.getCompressionType());
             raf.write(chunk.getData());
             byte[] padding = new byte[this.calculateChunkPadding(chunk)];
             raf.write(padding);
@@ -192,16 +196,20 @@ public class RegionInFile {
 
 
     private int calculateChunkPadding(ChunkInFile chunk) {
-        return calculateNumberOfSector(chunk) * SECTOR_SIZE - 4 - chunk.getChunkSize();
+        return calculateNumberOfSector(chunk) * SECTOR_SIZE - 5 - chunk.getChunkSize();
     }
 
     private int calculateNumberOfSector(ChunkInFile chunk) {
-        int chunkDataWithSize = chunk.getChunkSize() + 4;
+        // Location (4Bytes) + Compression type (1Byte) + Data
+        int chunkDataWithSize = chunk.getChunkSize() + 5;
         int numberBlocks = chunkDataWithSize / SECTOR_SIZE;
 
         if (numberBlocks % SECTOR_SIZE == 0) {
             return numberBlocks;
         } else {
+            APlugin.getInstance().warn(
+                    "no multiple-of-4096B {} for {}, mod: {}",
+                    numberBlocks, chunk, numberBlocks % SECTOR_SIZE);
             return numberBlocks + 1;
         }
     }
