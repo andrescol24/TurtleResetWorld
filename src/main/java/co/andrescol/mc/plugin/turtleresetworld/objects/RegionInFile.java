@@ -128,6 +128,7 @@ public class RegionInFile {
     }
 
     private void writeFile() throws IOException {
+        APlugin.getInstance().info("Writing file without unclaimed chunks");
         RandomAccessFile raf = new RandomAccessFile(this.file, "rw");
 
         int actualPosition = 2;
@@ -135,9 +136,11 @@ public class RegionInFile {
 
         for(ChunkInFile chunk : this.chunksInFile) {
             if(!chunk.isProtectedChunk()) {
+                APlugin.getInstance().info("Ignoring chunk {}", chunk);
                 locations[chunk.getArrayPosition()] = 0;
                 timestamps[chunk.getArrayPosition()] = 0;
             } else {
+                APlugin.getInstance().info("Writing chunk {} in the position {}", chunk, actualPosition);
                 locations[chunk.getArrayPosition()] = (actualPosition << 8) | chunk.getChunkSize();
 
                 // calculation the next position of the next chunk it has to be multiple of SECTOR_SIZE
@@ -181,8 +184,6 @@ public class RegionInFile {
             int xCalculated = Math.floorDiv(chunk.getX(), 32);
             int zCalculated = Math.floorDiv(chunk.getZ(), 32);
             if (this.x == xCalculated && this.z == zCalculated) {
-                APlugin.getInstance().info("It found the protected chunk {}/{} in region {}",
-                        chunk.getX(), chunk.getZ(), this);
                 protectedChunks.add(chunk);
             }
         }
@@ -201,8 +202,6 @@ public class RegionInFile {
         if (numberBlocks % SECTOR_SIZE == 0) {
             return numberBlocks;
         } else {
-            APlugin.getInstance().warn("this chunk {} has an incorrect size, mod: {}",
-                    chunk, numberBlocks % SECTOR_SIZE);
             return numberBlocks + 1;
         }
     }
@@ -217,7 +216,6 @@ public class RegionInFile {
     private boolean isProtectedChunk(int x, int z) {
         for (Chunk chunk : this.protectedChunks) {
             if (chunk.getX() == x && chunk.getZ() == z) {
-                APlugin.getInstance().info("The chunk {}/{} is protected", x, z);
                 return true;
             }
         }
