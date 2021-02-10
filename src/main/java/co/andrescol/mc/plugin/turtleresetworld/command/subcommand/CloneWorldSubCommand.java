@@ -38,62 +38,57 @@ public class CloneWorldSubCommand extends ASubCommand {
                         .environment(world.getEnvironment()).seed(world.getSeed());
                 World clone = creator.createWorld();
 
-                List<Claimer> claimers = TurtleResetWorldPlugin.getHooks();
+                List<Chunk> chunksClaimed = TurtleResetWorldPlugin.getChunksClaimedByHooks();
 
                 APlugin.getInstance().info("Loading chunks...");
-                for(Claimer claimer : claimers) {
-                    for(Chunk chunk : claimer.getClaimedChunks()) {
-                        if(chunk.getWorld().equals(world)) {
-                            clone.loadChunk(chunk.getX(), chunk.getZ());
-                        }
+                for (Chunk chunk : chunksClaimed) {
+                    if (chunk.getWorld().equals(world)) {
+                        clone.loadChunk(chunk.getX(), chunk.getZ());
                     }
                 }
 
                 APlugin.getInstance().info("Copying blocks...");
-                for(Claimer claimer : claimers) {
-                    for(Chunk chunk : claimer.getClaimedChunks()) {
-                        if(chunk.getWorld().equals(world)) {
-                            Chunk newChunk = clone.getChunkAt(chunk.getX(), chunk.getZ());
-                            APlugin.getInstance().info("Copying blocks for chunk {}", chunk);
-                            for(int y = 0; y < 255; y++) {
-                                for(int x = 0; x < 16; x++) {
-                                    for(int z = 0; z < 16; z++) {
-                                        Block block = chunk.getBlock(x, y, z);
+                for (Chunk chunk : chunksClaimed) {
+                    if (chunk.getWorld().equals(world)) {
+                        Chunk newChunk = clone.getChunkAt(chunk.getX(), chunk.getZ());
+                        APlugin.getInstance().info("Copying blocks for chunk {}", chunk);
+                        for (int y = 0; y < 255; y++) {
+                            for (int x = 0; x < 16; x++) {
+                                for (int z = 0; z < 16; z++) {
+                                    Block block = chunk.getBlock(x, y, z);
 
-                                        // Coping block data
-                                        BlockData data = block.getBlockData();
-                                        Block newBlock = newChunk.getBlock(x, y, z);
-                                        newBlock.setBlockData(data);
+                                    // Coping block data
+                                    BlockData data = block.getBlockData();
+                                    Block newBlock = newChunk.getBlock(x, y, z);
+                                    newBlock.setBlockData(data);
 
-                                        // Coping block state
-                                        BlockState state = block.getState();
-                                        newBlock.getState().setData(state.getData());
+                                    // Coping block state
+                                    BlockState state = block.getState();
+                                    newBlock.getState().setData(state.getData());
 
-                                        if(state instanceof Container) {
-                                            Container newContainer = (Container) newBlock.getState();
-                                            Container oldContainer = (Container) state;
-                                            newContainer.getInventory().setContents(oldContainer.getInventory().getContents());
-                                            newContainer.setCustomName(oldContainer.getCustomName());
-                                        }
+                                    if (state instanceof Container) {
+                                        Container newContainer = (Container) newBlock.getState();
+                                        Container oldContainer = (Container) state;
+                                        newContainer.getInventory().setContents(oldContainer.getInventory().getContents());
+                                        newContainer.setCustomName(oldContainer.getCustomName());
+                                    }
 
-                                        if(state instanceof Nameable) {
-                                            Nameable newNameable = (Nameable) newBlock.getState();
-                                            Nameable oldNameable = (Nameable) state;
-                                            newNameable.setCustomName(oldNameable.getCustomName());
-                                        }
+                                    if (state instanceof Nameable) {
+                                        Nameable newNameable = (Nameable) newBlock.getState();
+                                        Nameable oldNameable = (Nameable) state;
+                                        newNameable.setCustomName(oldNameable.getCustomName());
                                     }
                                 }
                             }
-                            APlugin.getInstance().info("Moving entities");
-                            for(Entity entity : chunk.getEntities()) {
-                                Location entityLocation = entity.getLocation();
-                                entityLocation.setWorld(clone);
-                                entity.teleport(entityLocation);
-                            }
+                        }
+                        APlugin.getInstance().info("Moving entities");
+                        for (Entity entity : chunk.getEntities()) {
+                            Location entityLocation = entity.getLocation();
+                            entityLocation.setWorld(clone);
+                            entity.teleport(entityLocation);
                         }
                     }
                 }
-                APlugin.getInstance().info("Copying blocks finished");
             }
         }.runTask(APlugin.getInstance());
         return true;

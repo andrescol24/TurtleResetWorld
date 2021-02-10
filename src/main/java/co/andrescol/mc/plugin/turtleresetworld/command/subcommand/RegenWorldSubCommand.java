@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.ClearRegionsRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.task.clean.RegenTask;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -38,10 +38,13 @@ public class RegenWorldSubCommand extends ASubCommand {
 
         // Get Worlds to reset
         String worldParam = AUtils.getArgument(1, args);
-        List<World> worlds = PARAM_ALL.equals(worldParam) ? Bukkit.getWorlds() : List.of(Bukkit.getWorld(worldParam));
+        List<World> worlds = PARAM_ALL.equals(worldParam)
+                ? Bukkit.getWorlds()
+                : List.of(Bukkit.getWorld(worldParam));
 
-        ClearRegionsRunnable runnable = new ClearRegionsRunnable(worlds);
-        runnable.runTaskAsynchronously(plugin);
+
+        RegenTask runnable = new RegenTask(worlds);
+        runnable.runTask(plugin);
         return true;
     }
 
