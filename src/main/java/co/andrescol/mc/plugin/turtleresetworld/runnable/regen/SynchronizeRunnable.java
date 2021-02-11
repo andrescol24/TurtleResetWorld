@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public abstract class SynchronizeRunnable extends BukkitRunnable {
 
-    private final OrchestratorRegenRunnable orchestrator;
+    protected final OrchestratorRegenRunnable orchestrator;
 
     public SynchronizeRunnable(OrchestratorRegenRunnable orchestrator) {
         this.orchestrator = orchestrator;

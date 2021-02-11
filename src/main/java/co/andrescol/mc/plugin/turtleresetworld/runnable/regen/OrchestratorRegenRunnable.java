@@ -19,6 +19,7 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
     private final Lock lock;
     private final Condition condition;
     private final List<World> worldsToRegen;
+    private Integer totalChunks;
 
     public OrchestratorRegenRunnable(List<World> worldsToRegen) {
         this.lock = new ReentrantLock();
@@ -53,17 +54,21 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
     private void executeTasks() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
 
+        this.totalChunks = 0;
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
             RegionFilesProcess filesResult = new RegionFilesProcess(world);
             filesResult.run();
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
+            this.totalChunks = chunkToRegen.size();
             List<SynchronizeRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToRegen);
             executables.addAll(executablesForWorld);
         }
 
         long delay = plugin.getConfig().getLong("timeOfGraceForServer.chunkRegen");
-        plugin.info("It is going to run {} task with {} tickets of delay", executables.size(), delay);
+        plugin.info("--- Starting regeneration by block --- " +
+                        "\nTotal chunks: {}\nexecutables: {}\ndelay: {}\nYou can see the advance with command /turtle state",
+                this.totalChunks, executables.size(), delay);
 
         for (SynchronizeRunnable task : executables) {
             task.runTaskLater(plugin, delay);
@@ -121,8 +126,8 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         int i = 0;
         int splitSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
         for (ChunkInFile chunkInFile : chunksToRegen) {
-            if (i < splitSize) {
-                chunksSplit.add(chunkInFile);
+            chunksSplit.add(chunkInFile);
+            if (i < splitSize-1) {
                 i++;
             } else {
                 SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);
@@ -136,6 +141,14 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
             executables.add((T) runnable);
         }
         return executables;
+    }
+
+    public Integer getTotalChunks() {
+        return totalChunks;
+    }
+
+    public void setTotalChunks(Integer totalChunks) {
+        this.totalChunks = totalChunks;
     }
 
     public Lock getLock() {
