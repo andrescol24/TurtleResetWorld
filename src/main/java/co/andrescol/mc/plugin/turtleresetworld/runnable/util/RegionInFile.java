@@ -123,7 +123,7 @@ public class RegionInFile {
             }
         }
         long claimed = chunks.stream().filter(ChunkInFile::isProtectedChunk).count();
-        APlugin.getInstance().info("Region {} has total Chunks {} and {} claimed",
+        APlugin.getInstance().info("{} has total Chunks {} and {} claimed",
                 this, chunks.size(), claimed);
         raf.close();
         return chunks;
@@ -163,6 +163,6 @@ public class RegionInFile {
 
     @Override
     public String toString() {
-        return String.format("x: %d, z: %d, file: %s", this.x, this.z, this.file.getName());
+        return String.format("region: %s", this.file.getName());
     }
 }

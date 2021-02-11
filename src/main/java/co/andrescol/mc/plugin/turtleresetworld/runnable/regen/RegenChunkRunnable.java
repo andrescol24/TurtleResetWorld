@@ -12,6 +12,8 @@ import org.bukkit.block.Container;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 
+import java.util.concurrent.ConcurrentLinkedDeque;
+
 /**
  * This Runnable access to Bukkit API to copy blocks from the clone world to
  * the real world.
@@ -20,33 +22,32 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
 
     private final World real;
     private final World clone;
-    private final int x;
-    private final int z;
+    private final ConcurrentLinkedDeque<ChunkInFile> chunks;
 
     public RegenChunkRunnable(OrchestratorRegenRunnable orchestrator, World real,
-                              World clone, ChunkInFile chunk) {
+                              World clone, ConcurrentLinkedDeque<ChunkInFile> chunks) {
         super(orchestrator);
         this.real = real;
         this.clone = clone;
-        this.x = chunk.getX();
-        this.z = chunk.getZ();
+        this.chunks = chunks;
     }
 
     @Override
     protected void execute() {
-        Chunk chunk = this.real.getChunkAt(this.x, this.z);
-        Chunk chunkClone = clone.getChunkAt(this.x, this.z);
-        this.copyBlock(chunkClone, chunk);
-        this.real.unloadChunk(chunk);
-        clone.unloadChunk(chunkClone);
-        APlugin.getInstance().info(
-                "Blocks for chunks {}/{} in world {} copied!", this.x, this.z, this.real);
+        for(ChunkInFile chunkFile : this.chunks) {
+            Chunk chunk = this.real.getChunkAt(chunkFile.getX(), chunkFile.getZ());
+            Chunk chunkClone = clone.getChunkAt(chunkFile.getX(), chunkFile.getZ());
+            this.copyBlock(chunkClone, chunk);
+            this.real.unloadChunk(chunk);
+            clone.unloadChunk(chunkClone);
+        }
+        APlugin.getInstance().info("{} chunks regenerated!", this.chunks.size());
     }
 
     private void copyBlock(Chunk from, Chunk to) {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                for (int y = 0; y < this.real.getHighestBlockYAt(x, z); y++) {
+                for (int y = 0; y < 256; y++) {
                     Block block = from.getBlock(x, y, z);
                     Block newBlock = to.getBlock(x, y, z);
 
@@ -73,17 +74,18 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
                 }
             }
         }
-
-        for (Entity entity : from.getEntities()) {
-            Location entityLocation = entity.getLocation();
-            entityLocation.setWorld(clone);
-            entity.teleport(entityLocation);
+        boolean includeEntities = APlugin.getInstance().getConfig().getBoolean("includeEntities");
+        if(includeEntities) {
+            for (Entity entity : from.getEntities()) {
+                Location entityLocation = entity.getLocation();
+                entityLocation.setWorld(clone);
+                entity.teleport(entityLocation);
+            }
         }
     }
 
     @Override
     public String toString() {
-        return String.format("RegenChunkRunnable of chunk [%d/%d] in %s",
-                this.x, this.z, this.real.getName());
+        return String.format("RegenChunkRunnable of %s", this.real.getName());
     }
 }

@@ -3,6 +3,7 @@ package co.andrescol.mc.plugin.turtleresetworld.command;
 import java.util.List;
 
 import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.RegenWorldSubCommand;
+import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.TpSubCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -12,6 +13,7 @@ public class TurtleResetWorldCommand extends AMainCommand {
 
 	public TurtleResetWorldCommand() {
 		this.addSubCommand(new RegenWorldSubCommand());
+		this.addSubCommand(new TpSubCommand());
 	}
 
 	@Override

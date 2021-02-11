@@ -15,37 +15,37 @@ import java.util.stream.Collectors;
 /**
  * This runnable is going to regen only the regions without claimed chunks.
  * The chunks that need to be regenerated can be accessed with the method
- * {@link RegenWorld#getChunksToRegen()}
+ * {@link RegionFilesProcess#getChunksToRegen()}
  */
-public class RegenWorld {
+public class RegionFilesProcess {
 
     private final World world;
     private final List<ChunkInFile> chunksToRegen = new LinkedList<>();
 
-    public RegenWorld(World worldToRegen) {
+    public RegionFilesProcess(World worldToRegen) {
         this.world = worldToRegen;
     }
 
     /**
-     * Read all region files and it determinates if there are
+     * Read all region files and it determinate if there are
      * claimed chunks.
      */
     public void run() {
         APlugin plugin = APlugin.getInstance();
-        plugin.info("-------- Running world {} regen task --------", this.world.getName());
+        plugin.info("-------- Running {} region files process --------", this.world.getName());
         try {
             List<RegionInFile> regions = this.getRegionsInWorldFolder();
             for(RegionInFile region : regions) {
                 if(region.hasClaimedChunks()) {
-                    plugin.info("The region {} has claimed chunks, " +
-                            "adding them to process them then", this);
+                    plugin.info("{} has claimed chunks, " +
+                            "adding them to process them then", region);
                     this.chunksToRegen.addAll(region.getUnclaimedChunks());
                 } else {
                     boolean deleted = region.deleteFile();
                     if (!deleted) {
-                        plugin.warn("The region file {} couldn't be deleted", region);
+                        plugin.warn("{} couldn't be deleted", region);
                     } else {
-                        plugin.info("Region {} deleted!", region);
+                        plugin.info("{} deleted!", region);
                     }
                 }
             }
