@@ -6,7 +6,13 @@ safeOfSuffocation:
     y: 70
     z: 0
     world: world
-ticksBetweenChunkRegen: 120
+timeOfGraceForServer:
+  chunkRegen: 80
+  worldCreating: 200
+  filterChunkSize: 40
+  filterChunk: 200
+filterChunk:
+  maxDifferentBlocks: 10
 # This field is auto generated before a regeneration
 lastRegenDate: null
 

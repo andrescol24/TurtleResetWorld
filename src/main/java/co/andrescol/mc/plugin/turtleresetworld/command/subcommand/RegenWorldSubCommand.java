@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRegenRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.OrchestratorRegenRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;

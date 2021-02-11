@@ -38,7 +38,7 @@ public class TurtleResetWorldPlugin extends APlugin{
 	public static List<Chunk> getChunksClaimedByHooks() {
 		List<Claimer> claimers = new LinkedList<>();
 		if (Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
-			APlugin.getInstance().info("There is GriefPrevention plugin!");
+			APlugin.getInstance().info("Hook wit GriefPrevention plugin!");
 			claimers.add(new GriefPreventionClaimer());
 		}
 		List<Chunk> chunks = new LinkedList<>();
