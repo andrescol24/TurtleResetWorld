@@ -6,6 +6,7 @@ safeOfSuffocation:
     y: 70
     z: 0
     world: world
+ticksBetweenChunkRegen: 120
 # This field is auto generated before a regeneration
 lastRegenDate: null
 

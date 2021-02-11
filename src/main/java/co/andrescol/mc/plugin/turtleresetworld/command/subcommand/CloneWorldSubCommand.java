@@ -4,6 +4,7 @@ import co.andrescol.mc.library.command.ASubCommand;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRegenRunnable;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -27,70 +28,9 @@ public class CloneWorldSubCommand extends ASubCommand {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
-        String worldName = args[1];
-        World world = Bukkit.getWorld(worldName);
-
-        // Create world
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                WorldCreator creator = new WorldCreator("cloneOf_" + worldName)
-                        .environment(world.getEnvironment()).seed(world.getSeed());
-                World clone = creator.createWorld();
-
-                List<Chunk> chunksClaimed = TurtleResetWorldPlugin.getChunksClaimedByHooks();
-
-                APlugin.getInstance().info("Loading chunks...");
-                for (Chunk chunk : chunksClaimed) {
-                    if (chunk.getWorld().equals(world)) {
-                        clone.loadChunk(chunk.getX(), chunk.getZ());
-                    }
-                }
-
-                APlugin.getInstance().info("Copying blocks...");
-                for (Chunk chunk : chunksClaimed) {
-                    if (chunk.getWorld().equals(world)) {
-                        Chunk newChunk = clone.getChunkAt(chunk.getX(), chunk.getZ());
-                        APlugin.getInstance().info("Copying blocks for chunk {}", chunk);
-                        for (int y = 0; y < 255; y++) {
-                            for (int x = 0; x < 16; x++) {
-                                for (int z = 0; z < 16; z++) {
-                                    Block block = chunk.getBlock(x, y, z);
-
-                                    // Coping block data
-                                    BlockData data = block.getBlockData();
-                                    Block newBlock = newChunk.getBlock(x, y, z);
-                                    newBlock.setBlockData(data);
-
-                                    // Coping block state
-                                    BlockState state = block.getState();
-                                    newBlock.getState().setData(state.getData());
-
-                                    if (state instanceof Container) {
-                                        Container newContainer = (Container) newBlock.getState();
-                                        Container oldContainer = (Container) state;
-                                        newContainer.getInventory().setContents(oldContainer.getInventory().getContents());
-                                        newContainer.setCustomName(oldContainer.getCustomName());
-                                    }
-
-                                    if (state instanceof Nameable) {
-                                        Nameable newNameable = (Nameable) newBlock.getState();
-                                        Nameable oldNameable = (Nameable) state;
-                                        newNameable.setCustomName(oldNameable.getCustomName());
-                                    }
-                                }
-                            }
-                        }
-                        APlugin.getInstance().info("Moving entities");
-                        for (Entity entity : chunk.getEntities()) {
-                            Location entityLocation = entity.getLocation();
-                            entityLocation.setWorld(clone);
-                            entity.teleport(entityLocation);
-                        }
-                    }
-                }
-            }
-        }.runTask(APlugin.getInstance());
+//        OrchestratorRegenRunnable orchestrator = new OrchestratorRegenRunnable();
+//        orchestrator.runTaskAsynchronously(APlugin.getInstance());
+  //      APlugin.getInstance().info("Finished in onCommand!");
         return true;
     }
 

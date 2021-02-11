@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.task.clean.RegenTask;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRegenRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -26,8 +26,6 @@ public class RegenWorldSubCommand extends ASubCommand {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         APlugin plugin = APlugin.getInstance();
-        plugin.info("Starting worlds regeneration");
-
         // Add a listener to prevent player's join temporally
         AntiPlayerJoinListener listener = new AntiPlayerJoinListener();
         plugin.getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
@@ -41,10 +39,9 @@ public class RegenWorldSubCommand extends ASubCommand {
         List<World> worlds = PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
                 : List.of(Bukkit.getWorld(worldParam));
-
-
-        RegenTask runnable = new RegenTask(worlds);
-        runnable.runTask(plugin);
+        OrchestratorRegenRunnable runnable = new OrchestratorRegenRunnable(worlds);
+        runnable.runTaskAsynchronously(plugin);
+        plugin.info("Starting worlds regeneration");
         return true;
     }
 

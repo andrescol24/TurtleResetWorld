@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This class facility the region file process.
@@ -62,6 +63,16 @@ public class RegionInFile {
      */
     public boolean hasClaimedChunks() {
         return this.chunksInFile.stream().anyMatch(ChunkInFile::isProtectedChunk);
+    }
+
+    /**
+     * Check if in this region there are claimed chunks
+     *
+     * @return true if there are claimed chunks
+     */
+    public List<ChunkInFile> getUnclaimedChunks() {
+        return this.chunksInFile.stream()
+                .filter(chunk -> !chunk.isProtectedChunk()).collect(Collectors.toList());
     }
 
     /**
