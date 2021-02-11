@@ -13,7 +13,7 @@ timeOfGraceForServer:
 chunksPerThread: 30
 includeEntities: true
 filterChunk:
-  maxDifferentBlocks: 10
+  maxDifferentBlocksOfAir: 10
 # This field is auto generated before a regeneration
 lastRegenDate: null
 

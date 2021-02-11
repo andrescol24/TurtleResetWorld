@@ -30,6 +30,11 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.LARGE_FERN));
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.TALL_GRASS));
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.GRASS));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.FERN));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.SUGAR_CANE));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.CACTUS));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.BROWN_MUSHROOM));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.CAVE_AIR, Material.BROWN_MUSHROOM));
 
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.DANDELION));
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.POPPY));
@@ -47,6 +52,14 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.LILAC));
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.ROSE_BUSH));
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.PEONY));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.ACACIA_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.BIRCH_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.DARK_OAK_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.JUNGLE_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.OAK_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.AIR, Material.SPRUCE_LEAVES));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.CAVE_AIR, Material.WATER));
+        IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.CAVE_AIR, Material.LAVA));
 
         // Plants that ground in water
         IGNORABLE_REPLACEMENTS.add(new IgnoreBlockChange(Material.WATER, Material.TALL_SEAGRASS));
@@ -67,7 +80,7 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
         for (ChunkInFile chunkInFile : this.chunksToRegen) {
             Chunk chunk = this.real.getChunkAt(chunkInFile.getX(), chunkInFile.getZ());
             Chunk chunkClone = clone.getChunkAt(chunkInFile.getX(), chunkInFile.getZ());
-            boolean same = this.compareChunks(chunk, chunkClone);
+            boolean same = this.compareChunkAirBlocksAndWaterBlocksAndContainers(chunk, chunkClone);
             if (same) {
                 this.chunksToRegen.remove(chunkInFile);
             }
@@ -82,8 +95,8 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
      * @param chunkClone Clone
      * @return true if the same
      */
-    private boolean compareChunks(Chunk chunk, Chunk chunkClone) {
-        int maxDifferentBlocks = APlugin.getInstance().getConfig().getInt("filterChunk.maxDifferentBlocks");
+    private boolean compareChunkAirBlocksAndWaterBlocksAndContainers(Chunk chunk, Chunk chunkClone) {
+        int maxDifferentBlocks = APlugin.getInstance().getConfig().getInt("filterChunk.maxDifferentBlocksOfAir");
         int count = 0;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
@@ -93,8 +106,11 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
                     if (realBlock.getType() != cloneBlock.getType()) {
                         if (!IGNORABLE_REPLACEMENTS.contains
                                 (new IgnoreBlockChange(cloneBlock.getType(), realBlock.getType()))) {
-                            APlugin.getInstance().info("different: {} - {}", cloneBlock.getType(), realBlock.getType());
-                            count++;
+                            if(isAirOrWater(realBlock.getType()) || isAirOrWater(cloneBlock.getType())) {
+                                APlugin.getInstance().info("different: {} - {}", cloneBlock.getType(),
+                                        realBlock.getType());
+                                count++;
+                            }
                         }
                     } else if(cloneBlock.getState() instanceof Container) {
                         if(this.hasDifferentContent(cloneBlock, realBlock)) {
@@ -111,11 +127,24 @@ public class FilterChunksRunnable extends SynchronizeRunnable {
         return true;
     }
 
+    private boolean isAirOrWater(Material material) {
+        switch (material) {
+            case AIR:
+            case CAVE_AIR:
+            case VOID_AIR:
+            case WATER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private boolean hasDifferentContent(Block cloneBlock, Block realBlock) {
         ItemStack[] newContainer = ((Container) cloneBlock.getState()).getInventory().getContents();
         ItemStack[] oldContainer = ((Container) realBlock.getState()).getInventory().getContents();
-        for(int i = 0; i < oldContainer.length; i++) {
-            if(!newContainer[i].equals(oldContainer[i]))  {
+        for(int i = 0; i < newContainer.length && i < oldContainer.length; i++) {
+            ItemStack item = newContainer[i];
+            if(item != null && !item.equals(oldContainer[i]))  {
                 return true;
             }
         }
