@@ -94,8 +94,7 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
 
             // Adds executables for chunks and delete world
             if (createWorldRunnable.getClone() != null) {
-                List<RegenChunkRunnable> regenExecutables = this.filterChunksExecutables(
-                        chunksToRegen, world, createWorldRunnable.getClone());
+                List<RegenChunkRunnable> regenExecutables = this.splitChunks(chunksToRegen, world, createWorldRunnable.getClone());
                 executables.addAll(regenExecutables);
                 DeleteWorldRunnable deleteRunnable = new DeleteWorldRunnable(
                         this, createWorldRunnable.getClone());
@@ -106,45 +105,16 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
     }
 
     /**
-     * This method filters chunks that don't have changes
-     *
-     * @param chunksToRegen List of chunks in the world that going to be regenerate
-     * @param real          The real world
-     * @param clone         The clone world
-     * @return List of executables
-     * @throws InterruptedException Throw if there is an error waiting the filter
-     */
-    private List<RegenChunkRunnable> filterChunksExecutables(List<ChunkInFile> chunksToRegen, World real,
-                                                             World clone) throws InterruptedException {
-        List<FilterChunksRunnable> executables = this.splitChunks(
-                FilterChunksRunnable.class, chunksToRegen, real, clone);
-
-        List<ChunkInFile> totalChunks = new LinkedList<>();
-        int delayFilter = APlugin.getInstance().getConfig().getInt("timeOfGraceForServer.filterChunk");
-        for (FilterChunksRunnable runnable : executables) {
-            runnable.runTaskLater(APlugin.getInstance(), delayFilter);
-            this.condition.await();
-            totalChunks.addAll(runnable.getChunksToRegen());
-        }
-        List<RegenChunkRunnable> result = this.splitChunks(RegenChunkRunnable.class, totalChunks, real, clone);
-        APlugin.getInstance().info("----- chunk to regen: {} in {} executables -----",
-                totalChunks.size(), result.size());
-        return result;
-    }
-
-    /**
-     * This method spit the chunksToRegen in several {@link FilterChunksRunnable} or {@link RegenChunkRunnable} with
+     * This method spit the chunksToRegen in several {@link RegenChunkRunnable} with
      * config value <strong>chunksPerThread</strong> size
      *
-     * @param type          Type of list. Only can be {@link FilterChunksRunnable} or {@link RegenChunkRunnable}
      * @param chunksToRegen Array to split
      * @param real          real world
      * @param clone         Clone World
      * @return list of executables each with its list of chunks to filter
      */
     @SuppressWarnings("unchecked")
-    private <T extends SynchronizeRunnable> List<T> splitChunks(
-            Class<T> type, List<ChunkInFile> chunksToRegen, World real, World clone) {
+    private <T extends SynchronizeRunnable> List<T> splitChunks(List<ChunkInFile> chunksToRegen, World real, World clone) {
 
         List<T> executables = new LinkedList<>();
         ConcurrentLinkedDeque<ChunkInFile> chunksSplit = new ConcurrentLinkedDeque<>();
@@ -155,20 +125,14 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
                 chunksSplit.add(chunkInFile);
                 i++;
             } else {
-                SynchronizeRunnable runnable =
-                        type == FilterChunksRunnable.class
-                                ? new FilterChunksRunnable(this, chunksSplit, real, clone)
-                                : new RegenChunkRunnable(this, real, clone, chunksSplit);
+                SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);
                 executables.add((T) runnable);
                 chunksSplit = new ConcurrentLinkedDeque<>();
                 i = 0;
             }
         }
         if (!chunksSplit.isEmpty()) {
-            SynchronizeRunnable runnable =
-                    type == FilterChunksRunnable.class
-                            ? new FilterChunksRunnable(this, chunksSplit, real, clone)
-                            : new RegenChunkRunnable(this, real, clone, chunksSplit);
+            SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);
             executables.add((T) runnable);
         }
         return executables;

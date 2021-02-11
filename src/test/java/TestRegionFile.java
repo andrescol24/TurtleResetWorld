@@ -1,15 +1,7 @@
-import co.andrescol.mc.plugin.turtleresetworld.runnable.util.IgnoreBlockChange;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -36,15 +28,5 @@ public class TestRegionFile {
                 set.add(pos);
             }
         }
-    }
-    @Test
-    public void test_comparation_material() {
-        IgnoreBlockChange ignore1 = new IgnoreBlockChange(Material.ACACIA_BOAT, Material.AIR);
-        IgnoreBlockChange ignore2 = new IgnoreBlockChange(Material.AIR, Material.ACACIA_BOAT);
-        IgnoreBlockChange ignore3 = new IgnoreBlockChange(Material.ACACIA_BOAT, Material.AIR);
-        Assert.assertEquals(ignore1, ignore2);
-        Assert.assertEquals(ignore1.hashCode(), ignore2.hashCode());
-        Assert.assertEquals(ignore1, ignore3);
-        Assert.assertEquals(ignore1.hashCode(), ignore3.hashCode());
     }
 }
