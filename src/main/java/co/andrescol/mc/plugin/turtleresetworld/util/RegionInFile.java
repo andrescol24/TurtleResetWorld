@@ -1,6 +1,7 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.util;
+package co.andrescol.mc.plugin.turtleresetworld.util;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.Chunk;
 
 import java.io.File;

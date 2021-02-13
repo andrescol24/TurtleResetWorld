@@ -1,8 +1,8 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.util.ChunkInFile;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.util.RegionFilesProcess;
+import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
+import co.andrescol.mc.plugin.turtleresetworld.util.RegionFilesProcess;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
