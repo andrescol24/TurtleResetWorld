@@ -66,10 +66,8 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         }
 
         long delay = plugin.getConfig().getLong("timeOfGraceForServer.chunkRegen");
-        plugin.info("--- Starting regeneration by block --- " +
-                        "\nTotal chunks: {}\nexecutables: {}\ndelay: {}\nYou can see the advance with command /turtle state",
-                this.totalChunks, executables.size(), delay);
-
+        plugin.info("\n------ Starting regeneration: chunks to regen {} on {} process---------",
+                this.totalChunks, executables.size());
         for (SynchronizeRunnable task : executables) {
             task.runTaskLater(plugin, delay);
             this.condition.await();
@@ -127,7 +125,7 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         int splitSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
         for (ChunkInFile chunkInFile : chunksToRegen) {
             chunksSplit.add(chunkInFile);
-            if (i < splitSize-1) {
+            if (i < splitSize - 1) {
                 i++;
             } else {
                 SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);

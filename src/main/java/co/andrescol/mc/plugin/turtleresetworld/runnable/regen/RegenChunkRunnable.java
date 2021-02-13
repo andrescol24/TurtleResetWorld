@@ -42,8 +42,7 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
             clone.unloadChunk(chunkClone);
         }
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());
-        APlugin.getInstance().info("{} chunks regenerated. {} left", this.chunks.size(),
-                this.orchestrator.getTotalChunks());
+        APlugin.getInstance().info("{} chunks left", this.orchestrator.getTotalChunks());
     }
 
     private void copyBlock(Chunk from, Chunk to) {

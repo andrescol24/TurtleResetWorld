@@ -17,13 +17,11 @@ public class CreateWorldRunnable extends SynchronizeRunnable {
     @Override
     protected void execute() {
         APlugin plugin = APlugin.getInstance();
-        plugin.info("-------- Starting creating world for {} ------------", this.real);
+        plugin.info("-------- Starting creating world for {} ------------", this.real.getName());
         WorldCreator creator = new WorldCreator("cloneOf_" + this.real.getName())
                 .environment(this.real.getEnvironment()).seed(this.real.getSeed());
         this.clone = creator.createWorld();
-        if(this.clone != null) {
-            plugin.info("-------- Clone world created successfully ------------");
-        } else {
+        if (this.clone == null) {
             plugin.warn("The Clone world could not be created. Contact with the developer");
         }
     }

@@ -10,7 +10,7 @@ timeOfGraceForServer:
   chunkRegen: 80
   worldCreating: 200
 chunksPerThread: 40
-includeEntities: true
+includeEntities: false
 filterChunk:
   maxDifferentBlocksOfAir: 10
 # This field is auto generated before a regeneration
