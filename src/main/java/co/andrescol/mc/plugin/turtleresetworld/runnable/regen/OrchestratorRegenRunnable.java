@@ -58,9 +58,9 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
             RegionFilesProcess filesResult = new RegionFilesProcess(world);
-            filesResult.run();
+            filesResult.run(true);
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
-            this.totalChunks = chunkToRegen.size();
+            this.totalChunks = this.totalChunks + chunkToRegen.size();
             List<SynchronizeRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToRegen);
             executables.addAll(executablesForWorld);
         }

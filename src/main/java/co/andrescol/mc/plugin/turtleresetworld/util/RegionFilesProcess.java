@@ -30,7 +30,7 @@ public class RegionFilesProcess {
      * Read all region files and it determinate if there are
      * claimed chunks.
      */
-    public void run() {
+    public void run(boolean deleteRegionsNotClaimed) {
         APlugin plugin = APlugin.getInstance();
         plugin.info("-------- Running {} region files process --------", this.world.getName());
         try {
@@ -40,7 +40,7 @@ public class RegionFilesProcess {
                     plugin.info("{} has claimed chunks, " +
                             "adding them to process them then", region);
                     this.chunksToRegen.addAll(region.getUnclaimedChunks());
-                } else {
+                } else if(deleteRegionsNotClaimed){
                     boolean deleted = region.deleteFile();
                     if (!deleted) {
                         plugin.warn("{} couldn't be deleted", region);
@@ -53,6 +53,7 @@ public class RegionFilesProcess {
             plugin.error("Error during the world {} regen", e, world.getName());
         }
     }
+
 
     public List<ChunkInFile> getChunksToRegen() {
         return chunksToRegen;
