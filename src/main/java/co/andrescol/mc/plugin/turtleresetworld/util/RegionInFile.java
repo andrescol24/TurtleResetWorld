@@ -1,7 +1,6 @@
 package co.andrescol.mc.plugin.turtleresetworld.util;
 
 import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.Chunk;
 
 import java.io.File;
@@ -34,6 +33,8 @@ public class RegionInFile {
      * and 1 byte is the size of the chunk
      */
     private final int[] locations = new int[1024];
+
+    private  final int[] timestamp = new int[1024];
 
     /**
      * Create an instance of this class
@@ -85,10 +86,6 @@ public class RegionInFile {
         return this.file.delete();
     }
 
-    public List<ChunkInFile> getChunksInFile() {
-        return chunksInFile;
-    }
-
     /**
      * Read the region file
      *
@@ -108,17 +105,22 @@ public class RegionInFile {
             this.locations[i] = raf.readInt();
         }
 
+        for (int i = 0; i < this.timestamp.length; i++) {
+            this.timestamp[i] = raf.readInt();
+        }
+
         List<Chunk> protectedChunkRegion = this.filterClaimedChunks(protectedChunksWorld);
 
         // 32*X <= xChunk < 32*X + 32 -> Inequality of floor(x/32)
         for (int i = 32 * x; i < 32 * x + 32; i++) {
             for (int j = 32 * z; j < 32 * z + 32; j++) {
                 boolean isProtectedChunk = this.isProtectedChunk(i, j, protectedChunkRegion);
-                ChunkInFile chunkRegion = new ChunkInFile(i, j, isProtectedChunk);
+                ChunkInFile chunkRegion = new ChunkInFile(i, j, isProtectedChunk, timestamp);
                 int location = locations[chunkRegion.getArrayPosition()];
+                int timestampChunk = timestamp[chunkRegion.getArrayPosition()];
 
                 // location == 0 means that the chunk isn't charged
-                if (location != 0) {
+                if (location != 0 && timestampChunk != 0) {
                     chunks.add(chunkRegion);
                 }
             }

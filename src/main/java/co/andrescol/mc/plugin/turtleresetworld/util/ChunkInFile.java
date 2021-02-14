@@ -1,5 +1,6 @@
 package co.andrescol.mc.plugin.turtleresetworld.util;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -11,12 +12,14 @@ public class ChunkInFile {
     private final int z;
     private final boolean protectedChunk;
     private final int arrayPosition;
+    private final Date date;
 
-    public ChunkInFile(int x, int z, boolean protectedChunk) {
+    public ChunkInFile(int x, int z, boolean protectedChunk, int[] timestamp) {
         this.x = x;
         this.z = z;
         this.protectedChunk = protectedChunk;
         this.arrayPosition = ((x & 31) + (z & 31) * 32);
+        this.date = new Date((long)timestamp[this.arrayPosition] * 1000);
     }
 
     public int getX() {
@@ -37,8 +40,8 @@ public class ChunkInFile {
 
     @Override
     public String toString() {
-        return String.format("[%d/%d]: protected: %b",
-                this.x, this.z, this.protectedChunk);
+        return String.format("[%d/%d]: protected: %b, last modification: %s",
+                this.x, this.z, this.protectedChunk, this.date.toString());
     }
 
     @Override
