@@ -38,6 +38,7 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
 
     @Override
     protected void execute() {
+        APlugin.getInstance().info("Starting Regen task ID-{}", this.getTaskId());
         for (ChunkInFile chunkFile : this.chunks) {
             Chunk chunk = this.real.getChunkAt(chunkFile.getX(), chunkFile.getZ());
             Chunk chunkClone = clone.getChunkAt(chunkFile.getX(), chunkFile.getZ());
