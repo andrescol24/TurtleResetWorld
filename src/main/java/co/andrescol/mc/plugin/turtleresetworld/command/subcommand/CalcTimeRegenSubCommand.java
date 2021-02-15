@@ -2,10 +2,8 @@ package co.andrescol.mc.plugin.turtleresetworld.command.subcommand;
 
 import co.andrescol.mc.library.command.ASubCommand;
 import co.andrescol.mc.library.configuration.ALanguage;
-import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
-import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
+import co.andrescol.mc.plugin.turtleresetworld.util.TimeCalculator;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -13,6 +11,7 @@ import org.bukkit.command.CommandSender;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class CalcTimeRegenSubCommand extends ASubCommand {
 
@@ -26,36 +25,16 @@ public class CalcTimeRegenSubCommand extends ASubCommand {
         String worldParam = AUtils.getArgument(1, args);
         List<World> worlds = RegenWorldSubCommand.PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
-                : List.of(Bukkit.getWorld(worldParam));
-
-        List<ChunkInFile> chunksToRegen = new LinkedList<>();
-        for(World world : worlds) {
-            WorldFilesProcess process = new WorldFilesProcess(world);
-            process.run(false);
-            chunksToRegen.addAll(process.getChunksToRegen());
-        }
-
-        int totalChunks = chunksToRegen.size();
-        int executableSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
-        int numberExecutables = totalChunks / executableSize + 1;
-        int executableTime = executableSize / 8; // 8 chunks per second
-        int executeTime = numberExecutables * executableTime;
-
-        int graceTime = APlugin.getInstance().getConfig().getInt("timeOfGraceForServer.chunkRegen");
-        graceTime = (graceTime / 20) * numberExecutables; // 20 tics per second
-
-        // World creation + grace time + executables time + other time
-        double total = 30 * worlds.size() + graceTime + executeTime + 60;
-
+                : List.of(Objects.requireNonNull(Bukkit.getWorld(worldParam)));
+        TimeCalculator calculator = new TimeCalculator();
+        long total = calculator.calculate(worlds);
         String message;
-        if(total > 3600) {
-            // hours
+        if(total > 3600) { // hours
             total = total / 3600;
-            message = ALanguage.getMessage("CALCULATE_TIME_HOURS", totalChunks, total);
-        } else {
-            // Minutes
+            message = ALanguage.getMessage("CALCULATE_TIME_HOURS", calculator.getTotalChunks(), total);
+        } else { // Minutes
             total = total / 60;
-            message = ALanguage.getMessage("CALCULATE_TIME_MINUTES", totalChunks, total);
+            message = ALanguage.getMessage("CALCULATE_TIME_MINUTES", calculator.getTotalChunks(), total);
         }
         AUtils.sendMessage(commandSender, message);
         return true;

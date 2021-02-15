@@ -17,6 +17,6 @@ permissions:
   turtleresetworld: {description: Allows to see the plugin info, default: op}
   turtleresetworld.regen: {description: Allows regen worlds, default: op}
   turtleresetworld.reload: {description: Allows to execute the reload subcommand, default: op}
-  turtleresetworld.calculate: {description: Allows to watch the time of regeneration, default: false}
+  turtleresetworld.calculate: {description: Allows to watch the time of regeneration, default: op}
   turtleresetworld.tp: {description: Allows to teleport, default: op}
 

@@ -73,7 +73,7 @@
 				<configuration>
 					<filters>
 						<filter>
-							<artifact>co.andrescol.mc.library:AcolSpigotPluginsInitilizer</artifact>
+							<artifact>co.andrescol.mc.library:ASpigotPluginInitializer</artifact>
 							<includes>
 								<include>co/**</include>
 							</includes>
