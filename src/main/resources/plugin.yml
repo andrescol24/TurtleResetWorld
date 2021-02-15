@@ -4,17 +4,19 @@ main: co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin
 description: With this plugin you can reset automatically worlds
 softdepend:
   - GriefPrevention
-author: [xX_andrescol_Xx]
+author: xX_andrescol_Xx
 api-version: 1.16 
-website:
+website: none
 commands:
   turtle: 
     description: Reset worlds
-    permission-message: '[TurtleResetWorld] You dont haver permission for this command'
-    permission: turtleresetworld.info
+    permission-message: '[TurtleResetWorld] You do not have permission for this command'
+    permission: turtleresetworld
     usage: Incorrect usage, try /turtle regen <World name | all>
 permissions:
-  turtleresetworld.info: {description: Allows to see the plugin info, default: op}
+  turtleresetworld: {description: Allows to see the plugin info, default: op}
   turtleresetworld.regen: {description: Allows regen worlds, default: op}
   turtleresetworld.reload: {description: Allows to execute the reload subcommand, default: op}
+  turtleresetworld.calculate: {description: Allows to watch the time of regeneration, default: false}
+  turtleresetworld.tp: {description: Allows to teleport, default: op}
 

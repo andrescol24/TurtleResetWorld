@@ -2,7 +2,7 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
-import co.andrescol.mc.plugin.turtleresetworld.util.RegionFilesProcess;
+import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -16,10 +16,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class OrchestratorRegenRunnable extends BukkitRunnable {
 
-    private final Lock lock;
-    private final Condition condition;
-    private final List<World> worldsToRegen;
-    private Integer totalChunks;
+    protected final Lock lock;
+    protected final Condition condition;
+    protected final List<World> worldsToRegen;
+    protected Integer totalChunks;
 
     public OrchestratorRegenRunnable(List<World> worldsToRegen) {
         this.lock = new ReentrantLock();
@@ -46,7 +46,7 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
 
     /**
      * This method run all of task to regenerate all worlds.
-     * First it going to delete the region file without claimed chunks using the class {@link RegionFilesProcess}.
+     * First it going to delete the region file without claimed chunks using the class {@link WorldFilesProcess}.
      * Then it going to create the temporal world, regen chunks, and delete temporal worlds
      *
      * @throws InterruptedException Throws if there is an error waiting other thread
@@ -57,7 +57,7 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         this.totalChunks = 0;
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
-            RegionFilesProcess filesResult = new RegionFilesProcess(world);
+            WorldFilesProcess filesResult = new WorldFilesProcess(world);
             filesResult.run(true);
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
             this.totalChunks = this.totalChunks + chunkToRegen.size();

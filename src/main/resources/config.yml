@@ -7,12 +7,10 @@ safeOfSuffocation:
     z: 0
     world: world
 timeOfGraceForServer:
-  chunkRegen: 80
+  chunkRegen: 100
   worldCreating: 200
 chunksPerThread: 40
 includeEntities: false
-filterChunk:
-  maxDifferentBlocksOfAir: 10
 # This field is auto generated before a regeneration
 lastRegenDate: null
 

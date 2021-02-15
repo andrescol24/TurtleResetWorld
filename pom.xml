@@ -18,7 +18,7 @@
 		<!-- Local dependency -->
 		<dependency>
 			<groupId>co.andrescol.mc.library</groupId>
-			<artifactId>AcolSpigotPluginsInitilizer</artifactId>
+			<artifactId>ASpigotPluginInitializer</artifactId>
 			<version>1.0.0</version>
 			<scope>compile</scope>
 		</dependency>

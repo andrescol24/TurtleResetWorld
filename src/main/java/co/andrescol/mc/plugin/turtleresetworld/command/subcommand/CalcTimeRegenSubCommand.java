@@ -5,7 +5,7 @@ import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.library.utils.AUtils;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
-import co.andrescol.mc.plugin.turtleresetworld.util.RegionFilesProcess;
+import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -30,7 +30,7 @@ public class CalcTimeRegenSubCommand extends ASubCommand {
 
         List<ChunkInFile> chunksToRegen = new LinkedList<>();
         for(World world : worlds) {
-            RegionFilesProcess process = new RegionFilesProcess(world);
+            WorldFilesProcess process = new WorldFilesProcess(world);
             process.run(false);
             chunksToRegen.addAll(process.getChunksToRegen());
         }

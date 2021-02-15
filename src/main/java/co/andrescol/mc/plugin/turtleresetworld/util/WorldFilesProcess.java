@@ -15,14 +15,14 @@ import java.util.stream.Collectors;
 /**
  * This runnable is going to regen only the regions without claimed chunks.
  * The chunks that need to be regenerated can be accessed with the method
- * {@link RegionFilesProcess#getChunksToRegen()}
+ * {@link WorldFilesProcess#getChunksToRegen()}
  */
-public class RegionFilesProcess {
+public class WorldFilesProcess {
 
     private final World world;
     private final List<ChunkInFile> chunksToRegen = new LinkedList<>();
 
-    public RegionFilesProcess(World worldToRegen) {
+    public WorldFilesProcess(World worldToRegen) {
         this.world = worldToRegen;
     }
 
@@ -35,12 +35,12 @@ public class RegionFilesProcess {
         plugin.info("-------- Running {} region files process --------", this.world.getName());
         try {
             List<RegionInFile> regions = this.getRegionsInWorldFolder();
-            for(RegionInFile region : regions) {
-                if(region.hasClaimedChunks()) {
+            for (RegionInFile region : regions) {
+                if (region.hasClaimedChunks()) {
                     plugin.info("{} has claimed chunks, " +
                             "adding them to process them then", region);
                     this.chunksToRegen.addAll(region.getUnclaimedChunks());
-                } else if(deleteRegionsNotClaimed){
+                } else if (deleteRegionsNotClaimed) {
                     boolean deleted = region.deleteFile();
                     if (!deleted) {
                         plugin.warn("{} couldn't be deleted", region);
@@ -48,6 +48,30 @@ public class RegionFilesProcess {
                         plugin.info("{} deleted!", region);
                     }
                 }
+            }
+        } catch (Exception e) {
+            plugin.error("Error during the world {} regen", e, world.getName());
+        }
+    }
+
+    public void runForCopy() {
+        APlugin plugin = APlugin.getInstance();
+        plugin.info("-------- Running {} region files process --------", this.world.getName());
+        try {
+            List<RegionInFile> regions = this.getRegionsInWorldFolder();
+            for (RegionInFile region : regions) {
+                if (region.hasClaimedChunks()) {
+                    plugin.info("{} has claimed chunks, " +
+                            "adding them to process them then", region);
+                    this.chunksToRegen.addAll(region.getClaimedChunks());
+                }
+//                boolean deleted = region.deleteFile();
+//                if (!deleted) {
+//                    plugin.warn("{} couldn't be deleted", region);
+//                } else {
+//                    plugin.info("{} deleted!", region);
+//                }
+
             }
         } catch (Exception e) {
             plugin.error("Error during the world {} regen", e, world.getName());

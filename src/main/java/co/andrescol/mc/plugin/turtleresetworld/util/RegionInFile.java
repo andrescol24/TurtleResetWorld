@@ -77,6 +77,11 @@ public class RegionInFile {
                 .filter(chunk -> !chunk.isProtectedChunk()).collect(Collectors.toList());
     }
 
+    public List<ChunkInFile> getClaimedChunks() {
+        return this.chunksInFile.stream()
+                .filter(ChunkInFile::isProtectedChunk).collect(Collectors.toList());
+    }
+
     /**
      * Deletes the region file
      *

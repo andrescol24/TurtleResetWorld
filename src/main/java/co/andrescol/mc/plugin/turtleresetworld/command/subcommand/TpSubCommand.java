@@ -3,6 +3,7 @@ package co.andrescol.mc.plugin.turtleresetworld.command.subcommand;
 import co.andrescol.mc.library.command.ASubCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -12,11 +13,12 @@ import java.util.List;
 
 public class TpSubCommand extends ASubCommand {
     public TpSubCommand() {
-        super("tp", "otro");
+        super("tp", "turtleresetworld.tp");
     }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
+        new WorldCreator(args[1]).createWorld();
         Location location = new Location(Bukkit.getWorld(args[1]),
                 Double.parseDouble(args[2]),
                 Double.parseDouble(args[3]),  Double.parseDouble(args[4]));
