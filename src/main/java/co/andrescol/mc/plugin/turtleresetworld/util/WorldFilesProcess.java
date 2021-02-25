@@ -32,13 +32,10 @@ public class WorldFilesProcess {
      */
     public void run(boolean deleteRegionsNotClaimed) {
         APlugin plugin = APlugin.getInstance();
-        plugin.info("-------- Running {} region files process --------", this.world.getName());
         try {
             List<RegionInFile> regions = this.getRegionsInWorldFolder();
             for (RegionInFile region : regions) {
                 if (region.hasClaimedChunks()) {
-                    plugin.info("{} has claimed chunks, " +
-                            "adding them to process them then", region);
                     this.chunksToRegen.addAll(region.getUnclaimedChunks());
                 } else if (deleteRegionsNotClaimed) {
                     boolean deleted = region.deleteFile();
