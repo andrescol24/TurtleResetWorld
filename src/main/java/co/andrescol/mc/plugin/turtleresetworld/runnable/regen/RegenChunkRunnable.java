@@ -36,15 +36,25 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
         this.chunks = chunks;
     }
 
+    public World getReal() {
+        return real;
+    }
+
+    public ConcurrentLinkedDeque<ChunkInFile> getChunks() {
+        return chunks;
+    }
+
     @Override
     protected void execute() {
-        APlugin.getInstance().info("Starting Regen task ID-{}", this.getTaskId());
         for (ChunkInFile chunkFile : this.chunks) {
+            long start = System.currentTimeMillis();
             Chunk chunk = this.real.getChunkAt(chunkFile.getX(), chunkFile.getZ());
             Chunk chunkClone = clone.getChunkAt(chunkFile.getX(), chunkFile.getZ());
             this.copyChunk(chunkClone, chunk);
             this.real.unloadChunk(chunk);
             clone.unloadChunk(chunkClone);
+            long end = System.currentTimeMillis() - start;
+            APlugin.getInstance().info("Regen chunk {}/{} time: {}ms", chunkFile.getX(), chunk.getZ(), end);
         }
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());
         APlugin.getInstance().info("{} chunks left", this.orchestrator.getTotalChunks());
@@ -57,18 +67,16 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
                 for (int y = 0; y < 256; y++) {
                     Block block = from.getBlock(x, y, z);
                     Block newBlock = to.getBlock(x, y, z);
-                    this.copyChunk(block, newBlock, rightChests);
+                    this.copyBlock(block, newBlock, rightChests);
                 }
             }
         }
-
         // Inventory of double chest
         for (Block[] chest : rightChests) {
             Container oldContainer = (Container) chest[0].getState();
             Container newContainer = (Container) chest[1].getState();
             newContainer.getInventory().setContents(oldContainer.getInventory().getContents());
         }
-
         boolean includeEntities = APlugin.getInstance().getConfig().getBoolean("includeEntities");
         if (includeEntities) {
             for (Entity entity : from.getEntities()) {
@@ -89,7 +97,7 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
      *                    That mean that the inventory have to be copied then. If the block is
      *                    right chest it will add the block and newBlock to the list
      */
-    private void copyChunk(Block block, Block newBlock, List<Block[]> rightChests) {
+    private void copyBlock(Block block, Block newBlock, List<Block[]> rightChests) {
         try {
             if (block.getBlockData() instanceof Bisected) { // Doors
                 newBlock.setType(block.getType(), false);

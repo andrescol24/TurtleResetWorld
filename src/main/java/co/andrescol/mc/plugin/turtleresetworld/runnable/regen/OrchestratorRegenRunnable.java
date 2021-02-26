@@ -1,6 +1,9 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.data.ReadingDataException;
+import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationData;
+import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.World;
@@ -32,15 +35,17 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         this.lock.lock();
         APlugin plugin = APlugin.getInstance();
         plugin.info("Starting regeneration of worlds");
+        boolean success = false;
         try {
             this.executeTasks();
+            success = true;
         } catch (Exception e) {
             plugin.error("Error running the regeneration thread", e);
         } finally {
             this.lock.unlock();
         }
         plugin.info("The regeneration has Finished!");
-        RestartServerRunnable restartServerRunnable = new RestartServerRunnable();
+        RestartServerRunnable restartServerRunnable = new RestartServerRunnable(success);
         restartServerRunnable.runTask(plugin);
     }
 
@@ -51,8 +56,10 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
      *
      * @throws InterruptedException Throws if there is an error waiting other thread
      */
-    private void executeTasks() throws InterruptedException {
+    private void executeTasks() throws InterruptedException, ReadingDataException {
         APlugin plugin = APlugin.getInstance();
+        RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
+        RegenerationData data = dataManager.getData();
 
         this.totalChunks = 0;
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
@@ -61,9 +68,11 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
             filesResult.run(true);
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
             this.totalChunks = this.totalChunks + chunkToRegen.size();
+            data.addChunksToRegen(chunkToRegen, world);
             List<SynchronizeRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToRegen);
             executables.addAll(executablesForWorld);
         }
+        dataManager.saveData();
 
         long delay = plugin.getConfig().getLong("timeOfGraceForServer.chunkRegen");
         plugin.info("\n------ Starting regeneration: chunks to regen {} on {} process---------",
@@ -71,6 +80,12 @@ public class OrchestratorRegenRunnable extends BukkitRunnable {
         for (SynchronizeRunnable task : executables) {
             task.runTaskLater(plugin, delay);
             this.condition.await();
+
+            if(task instanceof RegenChunkRunnable) {
+                RegenChunkRunnable runnable = (RegenChunkRunnable) task;
+                data.removeChunksToRegen(runnable.getChunks(), runnable.getReal());
+                dataManager.saveData();
+            }
         }
     }
 

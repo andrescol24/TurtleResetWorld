@@ -120,9 +120,11 @@ public class RegionInFile {
         for (int i = 32 * x; i < 32 * x + 32; i++) {
             for (int j = 32 * z; j < 32 * z + 32; j++) {
                 boolean isProtectedChunk = this.isProtectedChunk(i, j, protectedChunkRegion);
-                ChunkInFile chunkRegion = new ChunkInFile(i, j, isProtectedChunk, timestamp);
-                int location = locations[chunkRegion.getArrayPosition()];
-                int timestampChunk = timestamp[chunkRegion.getArrayPosition()];
+                ChunkInFile chunkRegion = new ChunkInFile(i, j, isProtectedChunk);
+                int arrayPosition = chunkRegion.getArrayPosition();
+
+                int location = locations[arrayPosition];
+                int timestampChunk = timestamp[arrayPosition];
 
                 // location == 0 means that the chunk isn't charged
                 if (location != 0 && timestampChunk != 0) {
