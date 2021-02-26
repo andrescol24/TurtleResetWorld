@@ -2,43 +2,83 @@ package co.andrescol.mc.plugin.turtleresetworld.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Date;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
+import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+/**
+ * This class allow to save data in a YAML file
+ */
 public class RegenerationDataManager {
 
-    private RegenerationData data;
-
-    private RegenerationDataManager() {}
+    private static final String FILE_NAME = "regeneration_data.yml";
+    private final YamlConfiguration yamlData;
 
     /**
-     * Gets the data reading the file
-     *
-     * @return The regeneration data
-     * @throws ReadingDataException Threw if there was an error reading the file
+     * Create the instance
      */
-    public RegenerationData getData() throws ReadingDataException {
-        if (data == null) {
-            data = this.loadDataFromFile();
-        }
-        return data;
+    private RegenerationDataManager() {
+        yamlData = loadDataFromFile();
+    }
+
+    /**
+     * Add chunks to the world section
+     *
+     * @param world  World
+     * @param chunks chunks
+     */
+    public void addChunks(World world, Collection<ChunkInFile> chunks) {
+        WorldRegenerationData mapData = this.getDataOfSection(world);
+        mapData.addChunks(chunks);
+        this.saveData(world.getName(), mapData);
+    }
+
+    /**
+     * Remove chunks to the world section
+     *
+     * @param world  World
+     * @param chunks chunks
+     */
+    public void removeChunks(World world, Collection<ChunkInFile> chunks) {
+        WorldRegenerationData mapData = this.getDataOfSection(world);
+        mapData.removeChunks(chunks);
+        mapData.setLastRegeneration(new Date().getTime());
+        this.saveData(world.getName(), mapData);
+    }
+
+    public WorldRegenerationData getDataOf(World world) {
+        return this.getDataOfSection(world);
+    }
+
+    /**
+     * Gets the data of the world's section
+     *
+     * @param world world
+     * @return data
+     */
+    private WorldRegenerationData getDataOfSection(World world) {
+        String name = world.getName();
+        ConfigurationSection section = this.yamlData.getConfigurationSection(name);
+        return section != null ? new WorldRegenerationData(section) : new WorldRegenerationData();
     }
 
     /**
      * Saves the data
      */
-    public void saveData() {
-        if (data != null) {
-            APlugin plugin = APlugin.getInstance();
-            File file = new File(plugin.getDataFolder(), "data.yml");
-            try {
-                YamlConfiguration yaml = data.toYaml();
-                yaml.save(file);
-            } catch (IOException e) {
-                plugin.error("The data could not be saved", e);
-            }
+    private void saveData(String section, WorldRegenerationData data) {
+        APlugin plugin = APlugin.getInstance();
+        File file = new File(plugin.getDataFolder(), FILE_NAME);
+        try {
+            this.yamlData.set(section, data.toHashMap());
+            this.yamlData.save(file);
+        } catch (IOException e) {
+            plugin.error("The data could not be saved", e);
         }
     }
 
@@ -47,20 +87,19 @@ public class RegenerationDataManager {
      *
      * @return Regeneration data loaded from disk
      */
-    private RegenerationData loadDataFromFile() throws ReadingDataException {
+    private static YamlConfiguration loadDataFromFile() {
         APlugin plugin = APlugin.getInstance();
-        File file = new File(plugin.getDataFolder(), "data.yml");
+        File file = new File(plugin.getDataFolder(), FILE_NAME);
+        YamlConfiguration yaml = new YamlConfiguration();
         if (file.exists()) {
             try {
-                YamlConfiguration yaml = new YamlConfiguration();
                 yaml.load(file);
-                return new RegenerationData(yaml);
+                return yaml;
             } catch (IOException | InvalidConfigurationException e) {
-                throw new ReadingDataException(e);
+                plugin.warn("The data of the file {} wasn't read. It will be override", e, FILE_NAME);
             }
-        } else {
-            return new RegenerationData();
         }
+        return yaml;
     }
 
     // ===================== STATICS =================================

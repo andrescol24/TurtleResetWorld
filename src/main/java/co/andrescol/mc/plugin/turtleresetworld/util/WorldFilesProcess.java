@@ -2,6 +2,8 @@ package co.andrescol.mc.plugin.turtleresetworld.util;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin;
+import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
+import co.andrescol.mc.plugin.turtleresetworld.data.WorldRegenerationData;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 public class WorldFilesProcess {
 
     private final World world;
-    private final List<ChunkInFile> chunksToRegen = new LinkedList<>();
+    private List<ChunkInFile> chunksToRegen = new LinkedList<>();
 
     public WorldFilesProcess(World worldToRegen) {
         this.world = worldToRegen;
@@ -33,16 +35,25 @@ public class WorldFilesProcess {
     public void run(boolean deleteRegionsNotClaimed) {
         APlugin plugin = APlugin.getInstance();
         try {
-            List<RegionInFile> regions = this.getRegionsInWorldFolder();
-            for (RegionInFile region : regions) {
-                if (region.hasClaimedChunks()) {
-                    this.chunksToRegen.addAll(region.getUnclaimedChunks());
-                } else if (deleteRegionsNotClaimed) {
-                    boolean deleted = region.deleteFile();
-                    if (!deleted) {
-                        plugin.warn("{} couldn't be deleted", region);
-                    } else {
-                        plugin.info("{} deleted!", region);
+            RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
+            WorldRegenerationData data = dataManager.getDataOf(this.world);
+            List<ChunkInFile> listChunks = data.getChunksToRegen();
+            if (!listChunks.isEmpty()) {
+                plugin.info("Continue with {} chunks in the data", listChunks.size());
+                this.chunksToRegen = listChunks;
+            } else {
+                long lastRegeneration = data.getLastRegeneration() / 1000 + 3600;
+                List<RegionInFile> regions = this.getRegionsInWorldFolder(lastRegeneration);
+                for (RegionInFile region : regions) {
+                    if (region.hasClaimedChunks()) {
+                        this.chunksToRegen.addAll(region.getUnclaimedChunks());
+                    } else if (deleteRegionsNotClaimed) {
+                        boolean deleted = region.deleteFile();
+                        if (!deleted) {
+                            plugin.warn("{} couldn't be deleted", region);
+                        } else {
+                            plugin.info("{} deleted!", region);
+                        }
                     }
                 }
             }
@@ -51,31 +62,6 @@ public class WorldFilesProcess {
         }
     }
 
-    public void runForCopy() {
-        APlugin plugin = APlugin.getInstance();
-        plugin.info("-------- Running {} region files process --------", this.world.getName());
-        try {
-            List<RegionInFile> regions = this.getRegionsInWorldFolder();
-            for (RegionInFile region : regions) {
-                if (region.hasClaimedChunks()) {
-                    plugin.info("{} has claimed chunks, " +
-                            "adding them to process them then", region);
-                    this.chunksToRegen.addAll(region.getClaimedChunks());
-                }
-//                boolean deleted = region.deleteFile();
-//                if (!deleted) {
-//                    plugin.warn("{} couldn't be deleted", region);
-//                } else {
-//                    plugin.info("{} deleted!", region);
-//                }
-
-            }
-        } catch (Exception e) {
-            plugin.error("Error during the world {} regen", e, world.getName());
-        }
-    }
-
-
     public List<ChunkInFile> getChunksToRegen() {
         return chunksToRegen;
     }
@@ -83,17 +69,18 @@ public class WorldFilesProcess {
     /**
      * Get the list of loaded regions in the world reading the region folder
      *
+     * @param lastRegeneration Last regeneration in seconds
      * @return List of regions
      * @throws IOException Throws it if there is an error reading the region file
      */
-    private List<RegionInFile> getRegionsInWorldFolder() throws IOException {
+    private List<RegionInFile> getRegionsInWorldFolder(long lastRegeneration) throws IOException {
         List<RegionInFile> regions = new LinkedList<>();
         File regionFolder = this.getRegionFolder();
         if (regionFolder.exists()) {
             File[] files = Objects.requireNonNull(regionFolder.listFiles());
             List<Chunk> claimedChunks = this.getClaimedChunks();
             for (File file : files) {
-                RegionInFile region = new RegionInFile(file, claimedChunks);
+                RegionInFile region = new RegionInFile(file, claimedChunks, lastRegeneration);
                 regions.add(region);
             }
             return regions;

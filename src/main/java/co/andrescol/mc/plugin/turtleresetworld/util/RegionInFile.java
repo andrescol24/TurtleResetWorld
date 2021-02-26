@@ -34,22 +34,23 @@ public class RegionInFile {
      */
     private final int[] locations = new int[1024];
 
-    private  final int[] timestamp = new int[1024];
+    private final int[] timestamp = new int[1024];
 
     /**
      * Create an instance of this class
      *
-     * @param regionFile Region file
+     * @param regionFile       Region file
+     * @param lastRegeneration Last regeneration in seconds
      * @throws IOException If and error occurs during the file reading
      */
-    public RegionInFile(File regionFile, List<Chunk> protectedChunksWorld) throws IOException {
+    public RegionInFile(File regionFile, List<Chunk> protectedChunksWorld, long lastRegeneration) throws IOException {
         if (regionFile.getName().endsWith(".mca")) {
             String[] split = regionFile.getName().split("\\.");
             if (split.length == 4) {
                 this.x = Integer.parseInt(split[1]);
                 this.z = Integer.parseInt(split[2]);
                 this.file = regionFile;
-                this.chunksInFile = this.readFile(protectedChunksWorld);
+                this.chunksInFile = this.readFile(protectedChunksWorld, lastRegeneration);
             } else {
                 throw new IllegalStateException("The file " + regionFile.getName() + "isn't a region file");
             }
@@ -77,11 +78,6 @@ public class RegionInFile {
                 .filter(chunk -> !chunk.isProtectedChunk()).collect(Collectors.toList());
     }
 
-    public List<ChunkInFile> getClaimedChunks() {
-        return this.chunksInFile.stream()
-                .filter(ChunkInFile::isProtectedChunk).collect(Collectors.toList());
-    }
-
     /**
      * Deletes the region file
      *
@@ -95,9 +91,10 @@ public class RegionInFile {
      * Read the region file
      *
      * @param protectedChunksWorld List of the protected chunks in the world of this region
+     * @param lastRegeneration Last regeneration in seconds
      * @return List of chunks in the file
      */
-    private List<ChunkInFile> readFile(List<Chunk> protectedChunksWorld) throws IOException {
+    private List<ChunkInFile> readFile(List<Chunk> protectedChunksWorld, long lastRegeneration) throws IOException {
         RandomAccessFile raf = new RandomAccessFile(this.file, "rw");
         List<ChunkInFile> chunks = new LinkedList<>();
 
@@ -117,6 +114,7 @@ public class RegionInFile {
         List<Chunk> protectedChunkRegion = this.filterClaimedChunks(protectedChunksWorld);
 
         // 32*X <= xChunk < 32*X + 32 -> Inequality of floor(x/32)
+        int countFilteredDate = 0;
         for (int i = 32 * x; i < 32 * x + 32; i++) {
             for (int j = 32 * z; j < 32 * z + 32; j++) {
                 boolean isProtectedChunk = this.isProtectedChunk(i, j, protectedChunkRegion);
@@ -128,13 +126,17 @@ public class RegionInFile {
 
                 // location == 0 means that the chunk isn't charged
                 if (location != 0 && timestampChunk != 0) {
-                    chunks.add(chunkRegion);
+                    if(timestampChunk > lastRegeneration) {
+                        chunks.add(chunkRegion);
+                    } else {
+                        countFilteredDate++;
+                    }
                 }
             }
         }
         long claimed = chunks.stream().filter(ChunkInFile::isProtectedChunk).count();
-        APlugin.getInstance().info("{} has total Chunks {} and {} claimed",
-                this, chunks.size(), claimed);
+        APlugin.getInstance().info("{} has total Chunks {}, {} claimed. {} filtered by last regeneration",
+                this, chunks.size(), claimed, countFilteredDate);
         raf.close();
         return chunks;
     }
