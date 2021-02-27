@@ -26,8 +26,7 @@ public class TimeCalculator {
         this.totalChunks = chunksToRegen.size();
         int executableSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
         int numberExecutables = totalChunks / executableSize + 1;
-        int executableTime = executableSize / 8; // 8 chunks per second
-        int executeTime = numberExecutables * executableTime;
+        int executeTime = numberExecutables * executableSize; // 1 chunks per second
 
         int graceTime = APlugin.getInstance().getConfig().getInt("timeOfGraceForServer.chunkRegen");
         graceTime = (graceTime / 20) * numberExecutables; // 20 tics per second

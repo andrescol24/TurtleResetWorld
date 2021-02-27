@@ -9,6 +9,7 @@ import org.bukkit.World;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -42,8 +43,8 @@ public class WorldFilesProcess {
                 plugin.info("Continue with {} chunks in the data", listChunks.size());
                 this.chunksToRegen = listChunks;
             } else {
-                long lastRegeneration = data.getLastRegeneration() / 1000 + 3600;
-                List<RegionInFile> regions = this.getRegionsInWorldFolder(lastRegeneration);
+                APlugin.getInstance().info("Last regeneration date {}", new Date(data.getLastRegeneration()));
+                List<RegionInFile> regions = this.getRegionsInWorldFolder(data.getLastRegeneration());
                 for (RegionInFile region : regions) {
                     if (region.hasClaimedChunks()) {
                         this.chunksToRegen.addAll(region.getUnclaimedChunks());

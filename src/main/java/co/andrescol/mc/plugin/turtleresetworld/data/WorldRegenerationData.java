@@ -17,7 +17,7 @@ public class WorldRegenerationData {
     }
 
     WorldRegenerationData(ConfigurationSection section) {
-        this.lastRegeneration = section.getInt("lastRegeneration");
+        this.lastRegeneration = section.getLong("lastRegeneration");
         this.chunksToRegen = section.getStringList("chunksToRegen");
         APlugin.getInstance().info("Section constructor {}", this.chunksToRegen.size());
     }
@@ -55,8 +55,7 @@ public class WorldRegenerationData {
             String[] data = chunk.split(" ");
             int x = Integer.parseInt(data[0]);
             int z = Integer.parseInt(data[1]);
-            boolean protectedChunk = Boolean.parseBoolean(data[2]);
-            converted.add(new ChunkInFile(x, z, protectedChunk));
+            converted.add(new ChunkInFile(x, z, false));
         });
         return converted;
     }

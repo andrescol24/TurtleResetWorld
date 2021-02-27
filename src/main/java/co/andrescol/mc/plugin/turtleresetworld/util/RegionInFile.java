@@ -1,12 +1,10 @@
 package co.andrescol.mc.plugin.turtleresetworld.util;
 
-import co.andrescol.mc.library.plugin.APlugin;
 import org.bukkit.Chunk;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -115,7 +113,6 @@ public class RegionInFile {
         List<Chunk> protectedChunkRegion = this.filterClaimedChunks(protectedChunksWorld);
 
         // 32*X <= xChunk < 32*X + 32 -> Inequality of floor(x/32)
-        int countFilteredDate = 0;
         for (int i = 32 * x; i < 32 * x + 32; i++) {
             for (int j = 32 * z; j < 32 * z + 32; j++) {
                 boolean isProtectedChunk = this.isProtectedChunk(i, j, protectedChunkRegion);
@@ -127,20 +124,12 @@ public class RegionInFile {
 
                 // location == 0 means that the chunk isn't charged
                 if (location != 0 && timestampChunk != 0) {
-                    if(timestampChunk > lastRegeneration) {
-                        Date dateChunk = new Date(timestampChunk * 1000L);
-                        Date lastRegen = new Date(lastRegeneration * 1000);
-                        APlugin.getInstance().info("Comparing {} VS {}", dateChunk, lastRegen);
+                    if(timestampChunk > lastRegeneration / 1000) {
                         chunks.add(chunkRegion);
-                    } else {
-                        countFilteredDate++;
                     }
                 }
             }
         }
-        long claimed = chunks.stream().filter(ChunkInFile::isProtectedChunk).count();
-        APlugin.getInstance().info("{} has total Chunks {}, {} claimed. {} filtered by last regeneration",
-                this, chunks.size(), claimed, countFilteredDate);
         raf.close();
         return chunks;
     }

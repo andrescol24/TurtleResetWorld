@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Set;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
@@ -18,7 +20,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class RegenerationDataManager {
 
     private static final String FILE_NAME = "regeneration_data.yml";
-    private final YamlConfiguration yamlData;
+    private final HashMap<String, WorldRegenerationData> yamlData;
 
     /**
      * Create the instance
@@ -36,7 +38,7 @@ public class RegenerationDataManager {
     public void addChunks(World world, Collection<ChunkInFile> chunks) {
         WorldRegenerationData mapData = this.getDataOfSection(world);
         mapData.addChunks(chunks);
-        this.saveData(world.getName(), mapData);
+        this.saveData();
     }
 
     /**
@@ -49,7 +51,7 @@ public class RegenerationDataManager {
         WorldRegenerationData mapData = this.getDataOfSection(world);
         mapData.removeChunks(chunks);
         mapData.setLastRegeneration(new Date().getTime());
-        this.saveData(world.getName(), mapData);
+        this.saveData();
     }
 
     public WorldRegenerationData getDataOf(World world) {
@@ -64,19 +66,29 @@ public class RegenerationDataManager {
      */
     private WorldRegenerationData getDataOfSection(World world) {
         String name = world.getName();
-        ConfigurationSection section = this.yamlData.getConfigurationSection(name);
-        return section != null ? new WorldRegenerationData(section) : new WorldRegenerationData();
+        if(this.yamlData.containsKey(name)) {
+            return this.yamlData.get(name);
+        } else {
+            WorldRegenerationData data = new WorldRegenerationData();
+            this.yamlData.put(name, data);
+            this.saveData();
+            return data;
+        }
     }
 
     /**
      * Saves the data
      */
-    private void saveData(String section, WorldRegenerationData data) {
+    private void saveData() {
         APlugin plugin = APlugin.getInstance();
         File file = new File(plugin.getDataFolder(), FILE_NAME);
         try {
-            this.yamlData.set(section, data.toHashMap());
-            this.yamlData.save(file);
+            YamlConfiguration yaml = new YamlConfiguration();
+            Set<String> keys = this.yamlData.keySet();
+            for(String key : keys) {
+                yaml.set(key, this.yamlData.get(key).toHashMap());
+            }
+            yaml.save(file);
         } catch (IOException e) {
             plugin.error("The data could not be saved", e);
         }
@@ -87,19 +99,28 @@ public class RegenerationDataManager {
      *
      * @return Regeneration data loaded from disk
      */
-    private static YamlConfiguration loadDataFromFile() {
+    private static HashMap<String, WorldRegenerationData> loadDataFromFile() {
         APlugin plugin = APlugin.getInstance();
         File file = new File(plugin.getDataFolder(), FILE_NAME);
-        YamlConfiguration yaml = new YamlConfiguration();
+        HashMap<String, WorldRegenerationData> data = new HashMap<>();
         if (file.exists()) {
             try {
+                YamlConfiguration yaml = new YamlConfiguration();
                 yaml.load(file);
-                return yaml;
+                Set<String> keys = yaml.getKeys(false);
+                APlugin.getInstance().info("Key List {}", keys);
+                for (String key : keys) {
+                    ConfigurationSection section = yaml.getConfigurationSection(key);
+                    WorldRegenerationData worldData = section == null
+                            ? new WorldRegenerationData() : new WorldRegenerationData(section);
+                    data.put(key, worldData);
+                }
+                return data;
             } catch (IOException | InvalidConfigurationException e) {
                 plugin.warn("The data of the file {} wasn't read. It will be override", e, FILE_NAME);
             }
         }
-        return yaml;
+        return data;
     }
 
     // ===================== STATICS =================================
