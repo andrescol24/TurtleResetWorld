@@ -6,6 +6,7 @@ import org.bukkit.Chunk;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -127,6 +128,9 @@ public class RegionInFile {
                 // location == 0 means that the chunk isn't charged
                 if (location != 0 && timestampChunk != 0) {
                     if(timestampChunk > lastRegeneration) {
+                        Date dateChunk = new Date(timestampChunk * 1000L);
+                        Date lastRegen = new Date(lastRegeneration * 1000);
+                        APlugin.getInstance().info("Comparing {} VS {}", dateChunk, lastRegen);
                         chunks.add(chunkRegion);
                     } else {
                         countFilteredDate++;
