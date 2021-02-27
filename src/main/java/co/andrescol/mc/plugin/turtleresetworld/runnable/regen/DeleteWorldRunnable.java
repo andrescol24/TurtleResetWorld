@@ -1,15 +1,17 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
 import org.bukkit.World;
 
 import java.io.File;
 
-public class DeleteWorldRunnable extends SynchronizeRunnable{
+public class DeleteWorldRunnable extends SynchronizeRunnable {
 
     private final World clone;
 
-    public DeleteWorldRunnable(OrchestratorRegenRunnable orchestrator, World clone) {
+    public DeleteWorldRunnable(OrchestratorRunnable orchestrator, World clone) {
         super(orchestrator);
         this.clone = clone;
     }

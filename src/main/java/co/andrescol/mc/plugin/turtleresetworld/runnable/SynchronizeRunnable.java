@@ -1,6 +1,7 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.OrchestratorRegenRunnable;
 import org.bukkit.Chunk;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -10,9 +11,9 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public abstract class SynchronizeRunnable extends BukkitRunnable {
 
-    protected final OrchestratorRegenRunnable orchestrator;
+    protected final OrchestratorRunnable orchestrator;
 
-    public SynchronizeRunnable(OrchestratorRegenRunnable orchestrator) {
+    public SynchronizeRunnable(OrchestratorRunnable orchestrator) {
         this.orchestrator = orchestrator;
     }
 

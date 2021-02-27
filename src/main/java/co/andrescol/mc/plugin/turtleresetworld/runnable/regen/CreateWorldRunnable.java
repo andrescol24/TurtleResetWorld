@@ -1,6 +1,8 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 
@@ -9,7 +11,7 @@ public class CreateWorldRunnable extends SynchronizeRunnable {
     private final World real;
     private World clone;
 
-    public CreateWorldRunnable(OrchestratorRegenRunnable orchestrator, World realWorld) {
+    public CreateWorldRunnable(OrchestratorRunnable orchestrator, World realWorld) {
         super(orchestrator);
         this.real = realWorld;
     }

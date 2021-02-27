@@ -1,9 +1,13 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.copy;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.CreateWorldRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.DeleteWorldRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.RegenChunkRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.RestartServerRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.World;
@@ -13,12 +17,11 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class OrchestratorRegenRunnable extends OrchestratorRunnable {
+public class OrchestratorCopyRunnable extends OrchestratorRunnable {
 
     protected final List<World> worldsToRegen;
 
-    public OrchestratorRegenRunnable(List<World> worldsToRegen) {
-        super();
+    public OrchestratorCopyRunnable(List<World> worldsToRegen) {
         this.worldsToRegen = worldsToRegen;
     }
 

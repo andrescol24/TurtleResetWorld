@@ -1,6 +1,8 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -28,7 +30,7 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
     private final World clone;
     private final ConcurrentLinkedDeque<ChunkInFile> chunks;
 
-    public RegenChunkRunnable(OrchestratorRegenRunnable orchestrator, World real,
+    public RegenChunkRunnable(OrchestratorRunnable orchestrator, World real,
                               World clone, ConcurrentLinkedDeque<ChunkInFile> chunks) {
         super(orchestrator);
         this.real = real;
