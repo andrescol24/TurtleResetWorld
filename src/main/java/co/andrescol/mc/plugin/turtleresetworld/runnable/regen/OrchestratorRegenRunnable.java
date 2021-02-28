@@ -1,7 +1,9 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.data.FileName;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.CreateWorldRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
@@ -47,7 +49,8 @@ public class OrchestratorRegenRunnable extends OrchestratorRunnable {
      */
     private void executeTasks() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
-        RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
+        RegenerationDataManager dataManager = RegenerationDataManager
+                .getInstance(FileName.FILE_NAME_REGEN);
 
         this.totalChunks = 0;
         Queue<SynchronizeRunnable> executables = new LinkedList<>();

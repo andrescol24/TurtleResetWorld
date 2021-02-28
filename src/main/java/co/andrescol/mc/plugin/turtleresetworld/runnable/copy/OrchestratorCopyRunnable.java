@@ -1,13 +1,13 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.copy;
 
 import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.data.FileName;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
+import co.andrescol.mc.plugin.turtleresetworld.data.WorldRegenerationData;
+import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.CreateWorldRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.CreateWorldRunnable;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.DeleteWorldRunnable;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.RegenChunkRunnable;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.RestartServerRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.World;
@@ -19,16 +19,19 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class OrchestratorCopyRunnable extends OrchestratorRunnable {
 
-    protected final List<World> worldsToRegen;
+    private final List<World> worldsToRegen;
+    private final AntiPlayerJoinListener listener;
 
-    public OrchestratorCopyRunnable(List<World> worldsToRegen) {
+    public OrchestratorCopyRunnable(List<World> worldsToRegen, AntiPlayerJoinListener listener) {
         this.worldsToRegen = worldsToRegen;
+        this.listener = listener;
     }
 
     @Override
     public void run() {
         this.lock.lock();
         APlugin plugin = APlugin.getInstance();
+        plugin.info("!!!! Starting worlds regeneration: Copy claims to clone worlds!!!!");
         try {
             this.executeTasks();
             plugin.info("The regeneration has Finished!");
@@ -37,6 +40,8 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
         } finally {
             this.lock.unlock();
         }
+        UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(this.listener);
+        unRegisterEventRunnable.runTaskLater(plugin, 50L);
     }
 
     /**
@@ -46,31 +51,41 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
      */
     private void executeTasks() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
-        RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
 
         this.totalChunks = 0;
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
+        RegenerationDataManager dataManager = RegenerationDataManager
+                .getInstance(FileName.FILE_NAME_COPY);
+
         for (World world : this.worldsToRegen) {
+            // Delete region files that does not have claims
             WorldFilesProcess filesResult = new WorldFilesProcess(world);
             filesResult.deleteRegionsUnclaimed();
-            List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
-            this.totalChunks = this.totalChunks + chunkToRegen.size();
-            dataManager.addChunks(world, chunkToRegen);
+            List<ChunkInFile> chunkToCopy = filesResult.getProtectedChunks();
 
-            List<SynchronizeRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToRegen);
+            // Load and save the regeneration information
+            this.totalChunks = this.totalChunks + chunkToCopy.size();
+            WorldRegenerationData data = dataManager.getDataOf(world);
+            if(data.getChunksToRegen().isEmpty()) {
+                dataManager.addChunks(world, chunkToCopy);
+            }
+            // Gets executables for copy
+            List<CopyChunkRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToCopy);
             executables.addAll(executablesForWorld);
         }
 
-        long delay = plugin.getConfig().getLong("timeOfGraceForServer.chunkRegen");
         plugin.info("\n------ Starting regeneration: chunks to regen {} on {} process---------",
                 this.totalChunks, executables.size());
+
+        long delay = 200L;
         for (SynchronizeRunnable task : executables) {
             task.runTaskLater(plugin, delay);
             this.condition.await();
+            delay = task.getDelay();
 
-            if (task instanceof RegenChunkRunnable) {
-                RegenChunkRunnable runnable = (RegenChunkRunnable) task;
-                dataManager.removeChunks(runnable.getReal(), runnable.getChunks());
+            if (task instanceof CopyChunkRunnable) {
+                CopyChunkRunnable runnable = (CopyChunkRunnable) task;
+                dataManager.removeChunks(runnable.getFrom(), runnable.getChunks());
             }
         }
     }
@@ -85,59 +100,54 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
      * @throws InterruptedException It will throw it if there is an error waiting the
      *                              temporal world creating
      */
-    private List<SynchronizeRunnable> getWorldExecutables(World world, List<ChunkInFile> chunksToRegen)
+    private List<CopyChunkRunnable> getWorldExecutables(World world, List<ChunkInFile> chunksToRegen)
             throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
-        List<SynchronizeRunnable> executables = new LinkedList<>();
+        List<CopyChunkRunnable> executables = new LinkedList<>();
         if (!chunksToRegen.isEmpty()) {
             // Creates the temporal world
             CreateWorldRunnable createWorldRunnable = new CreateWorldRunnable(this, world);
-            long delayWorld = plugin.getConfig().getLong("timeOfGraceForServer.worldCreating");
-            createWorldRunnable.runTaskLater(plugin, delayWorld);
+            createWorldRunnable.runTask(plugin);
             this.condition.await();
 
             // Adds executables for chunks and delete world
             if (createWorldRunnable.getClone() != null) {
-                List<RegenChunkRunnable> regenExecutables = this.splitChunks(chunksToRegen, world, createWorldRunnable.getClone());
-                executables.addAll(regenExecutables);
-                DeleteWorldRunnable deleteRunnable = new DeleteWorldRunnable(
-                        this, createWorldRunnable.getClone());
-                executables.add(deleteRunnable);
+                List<CopyChunkRunnable> copyExecutables = this.splitChunks(chunksToRegen, createWorldRunnable.getClone(), world);
+                executables.addAll(copyExecutables);
             }
         }
         return executables;
     }
 
     /**
-     * This method spit the chunksToRegen in several {@link RegenChunkRunnable} with
+     * This method spit the chunks to copy in several {@link CopyChunkRunnable} with
      * config value <strong>chunksPerThread</strong> size
      *
-     * @param chunksToRegen Array to split
-     * @param real          real world
-     * @param clone         Clone World
+     * @param chunksToCopy Array to split
+     * @param to          real world
+     * @param from         Clone World
      * @return list of executables each with its list of chunks to filter
      */
-    @SuppressWarnings("unchecked")
-    private <T extends SynchronizeRunnable> List<T> splitChunks(List<ChunkInFile> chunksToRegen, World real, World clone) {
+    private List<CopyChunkRunnable> splitChunks(List<ChunkInFile> chunksToCopy, World to, World from) {
 
-        List<T> executables = new LinkedList<>();
+        List<CopyChunkRunnable> executables = new LinkedList<>();
         ConcurrentLinkedDeque<ChunkInFile> chunksSplit = new ConcurrentLinkedDeque<>();
         int i = 0;
         int splitSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
-        for (ChunkInFile chunkInFile : chunksToRegen) {
+        for (ChunkInFile chunkInFile : chunksToCopy) {
             chunksSplit.add(chunkInFile);
             if (i < splitSize - 1) {
                 i++;
             } else {
-                SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);
-                executables.add((T) runnable);
+                CopyChunkRunnable runnable = new CopyChunkRunnable(this, to, from, chunksSplit);
+                executables.add(runnable);
                 chunksSplit = new ConcurrentLinkedDeque<>();
                 i = 0;
             }
         }
         if (!chunksSplit.isEmpty()) {
-            SynchronizeRunnable runnable = new RegenChunkRunnable(this, real, clone, chunksSplit);
-            executables.add((T) runnable);
+            CopyChunkRunnable runnable = new CopyChunkRunnable(this, to, from, chunksSplit);
+            executables.add(runnable);
         }
         return executables;
     }

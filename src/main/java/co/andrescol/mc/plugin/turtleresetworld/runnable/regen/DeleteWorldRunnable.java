@@ -29,6 +29,11 @@ public class DeleteWorldRunnable extends SynchronizeRunnable {
         }
     }
 
+    @Override
+    public long getDelay() {
+        return 200L;
+    }
+
     private boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {

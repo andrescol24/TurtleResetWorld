@@ -5,6 +5,7 @@ import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.library.utils.AUtils;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.copy.OrchestratorCopyRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.OrchestratorRegenRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -18,13 +19,14 @@ public class CreateWorldSubCommand extends ASubCommand {
 
     public static final String PARAM_ALL = "all";
 
-    protected CreateWorldSubCommand() {
+    public CreateWorldSubCommand() {
         super("create", "turtleresetworld.create");
     }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         APlugin plugin = APlugin.getInstance();
+
         // Add a listener to prevent player's join temporally
         AntiPlayerJoinListener listener = new AntiPlayerJoinListener();
         plugin.getServer().getPluginManager().registerEvents(listener, APlugin.getInstance());
@@ -38,9 +40,8 @@ public class CreateWorldSubCommand extends ASubCommand {
         List<World> worlds = PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
                 : List.of(Bukkit.getWorld(worldParam));
-        OrchestratorRegenRunnable runnable = new OrchestratorRegenRunnable(worlds);
+        OrchestratorCopyRunnable runnable = new OrchestratorCopyRunnable(worlds, listener);
         runnable.runTaskAsynchronously(plugin);
-        plugin.info("Starting worlds regeneration");
         return true;
     }
 

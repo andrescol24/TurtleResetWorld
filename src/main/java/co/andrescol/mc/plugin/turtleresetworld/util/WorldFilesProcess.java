@@ -70,9 +70,9 @@ public class WorldFilesProcess {
             if (!region.hasClaimedChunks()) {
                 boolean deleted = region.deleteFile();
                 if (deleted) {
-                    plugin.info("{} file was deleted");
+                    plugin.info("{} file was deleted", this);
                 } else {
-                    plugin.warn("{} file was not deleted");
+                    plugin.warn("{} file was not deleted", this);
                 }
             }
         }

@@ -19,13 +19,15 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class RegenerationDataManager {
 
-    private static final String FILE_NAME = "regeneration_data.yml";
     private final HashMap<String, WorldRegenerationData> yamlData;
+    private final String fileName;
 
     /**
      * Create the instance
+     * @param fileName File name for the regeneration data.
      */
-    private RegenerationDataManager() {
+    private RegenerationDataManager(FileName fileName) {
+        this.fileName = fileName.getFileName();
         yamlData = loadDataFromFile();
     }
 
@@ -81,7 +83,7 @@ public class RegenerationDataManager {
      */
     private void saveData() {
         APlugin plugin = APlugin.getInstance();
-        File file = new File(plugin.getDataFolder(), FILE_NAME);
+        File file = new File(plugin.getDataFolder(), this.fileName);
         try {
             YamlConfiguration yaml = new YamlConfiguration();
             Set<String> keys = this.yamlData.keySet();
@@ -99,9 +101,9 @@ public class RegenerationDataManager {
      *
      * @return Regeneration data loaded from disk
      */
-    private static HashMap<String, WorldRegenerationData> loadDataFromFile() {
+    private HashMap<String, WorldRegenerationData> loadDataFromFile() {
         APlugin plugin = APlugin.getInstance();
-        File file = new File(plugin.getDataFolder(), FILE_NAME);
+        File file = new File(plugin.getDataFolder(), this.fileName);
         HashMap<String, WorldRegenerationData> data = new HashMap<>();
         if (file.exists()) {
             try {
@@ -116,19 +118,32 @@ public class RegenerationDataManager {
                 }
                 return data;
             } catch (IOException | InvalidConfigurationException e) {
-                plugin.warn("The data of the file {} wasn't read. It will be override", e, FILE_NAME);
+                plugin.warn("The data of the file {} wasn't read. It will be override", e, this.fileName);
             }
         }
         return data;
     }
 
     // ===================== STATICS =================================
-    private static RegenerationDataManager instance;
+    private static RegenerationDataManager instanceForRegen;
+    private static RegenerationDataManager instanceForCopy;
 
-    public static RegenerationDataManager getInstance() {
-        if (instance == null) {
-            instance = new RegenerationDataManager();
+    /**
+     * Get the instance
+     * @param forFile Enum that define the instance needed
+     * @return instance of this class
+     */
+    public static RegenerationDataManager getInstance(FileName forFile) {
+        if (forFile == FileName.FILE_NAME_COPY) {
+            if (instanceForCopy == null) {
+                instanceForCopy = new RegenerationDataManager(forFile);
+            }
+            return instanceForCopy;
         }
-        return instance;
+
+        if (instanceForRegen == null) {
+            instanceForRegen = new RegenerationDataManager(forFile);
+        }
+        return instanceForRegen;
     }
 }

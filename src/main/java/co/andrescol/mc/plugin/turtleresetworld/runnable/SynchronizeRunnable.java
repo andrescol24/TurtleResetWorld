@@ -1,8 +1,6 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.OrchestratorRegenRunnable;
-import org.bukkit.Chunk;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -36,4 +34,11 @@ public abstract class SynchronizeRunnable extends BukkitRunnable {
      * continue.
      */
     protected abstract void execute();
+
+    /**
+     * Get the time that the runnable will be wait to execute its code
+     *
+     * @return delay in ticks
+     */
+    public abstract long getDelay();
 }

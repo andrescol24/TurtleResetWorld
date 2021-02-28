@@ -1,4 +1,4 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
@@ -26,6 +26,11 @@ public class CreateWorldRunnable extends SynchronizeRunnable {
         if (this.clone == null) {
             plugin.warn("The Clone world could not be created. Contact with the developer");
         }
+    }
+
+    @Override
+    public long getDelay() {
+        return 200L;
     }
 
     public World getClone() {

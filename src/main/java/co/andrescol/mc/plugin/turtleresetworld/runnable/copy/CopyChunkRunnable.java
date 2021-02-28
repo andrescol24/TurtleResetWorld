@@ -1,4 +1,4 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.copy;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
@@ -20,26 +20,22 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-/**
- * This Runnable access to Bukkit API to copy blocks from the clone world to
- * the real world.
- */
-public class RegenChunkRunnable extends SynchronizeRunnable {
+public class CopyChunkRunnable extends SynchronizeRunnable {
 
-    private final World real;
-    private final World clone;
+    private final World to;
+    private final World from;
     private final ConcurrentLinkedDeque<ChunkInFile> chunks;
 
-    public RegenChunkRunnable(OrchestratorRunnable orchestrator, World real,
-                              World clone, ConcurrentLinkedDeque<ChunkInFile> chunks) {
+    public CopyChunkRunnable(OrchestratorRunnable orchestrator, World to,
+                              World from, ConcurrentLinkedDeque<ChunkInFile> chunks) {
         super(orchestrator);
-        this.real = real;
-        this.clone = clone;
+        this.to = to;
+        this.from = from;
         this.chunks = chunks;
     }
 
-    public World getReal() {
-        return real;
+    public World getFrom() {
+        return from;
     }
 
     public ConcurrentLinkedDeque<ChunkInFile> getChunks() {
@@ -50,13 +46,14 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
     protected void execute() {
         for (ChunkInFile chunkFile : this.chunks) {
             long start = System.currentTimeMillis();
-            Chunk chunk = this.real.getChunkAt(chunkFile.getX(), chunkFile.getZ());
-            Chunk chunkClone = clone.getChunkAt(chunkFile.getX(), chunkFile.getZ());
+            Chunk chunk = this.to.getChunkAt(chunkFile.getX(), chunkFile.getZ());
+            Chunk chunkClone = from.getChunkAt(chunkFile.getX(), chunkFile.getZ());
             this.copyChunk(chunkClone, chunk);
-            this.real.unloadChunk(chunk);
-            clone.unloadChunk(chunkClone);
+            this.to.unloadChunk(chunk);
+            from.unloadChunk(chunkClone);
             long end = System.currentTimeMillis() - start;
-            APlugin.getInstance().info("Regen chunk {}/{} time: {}ms", chunkFile.getX(), chunk.getZ(), end);
+            APlugin.getInstance().info("Copy from {} to {} chunk {}/{} time: {}ms",
+                    from.getName(), to.getName(), chunkFile.getX(), chunk.getZ(), end);
         }
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());
         APlugin.getInstance().info("{} chunks left", this.orchestrator.getTotalChunks());
@@ -88,7 +85,7 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
         if (includeEntities) {
             for (Entity entity : from.getEntities()) {
                 Location entityLocation = entity.getLocation();
-                entityLocation.setWorld(clone);
+                entityLocation.setWorld(this.from);
                 entity.teleport(entityLocation);
             }
         }
@@ -147,6 +144,6 @@ public class RegenChunkRunnable extends SynchronizeRunnable {
 
     @Override
     public String toString() {
-        return String.format("RegenChunkRunnable of %s", this.real.getName());
+        return String.format("RegenChunkRunnable of %s", this.to.getName());
     }
 }
