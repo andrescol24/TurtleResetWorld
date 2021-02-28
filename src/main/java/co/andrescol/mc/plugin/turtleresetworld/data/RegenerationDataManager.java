@@ -108,7 +108,6 @@ public class RegenerationDataManager {
                 YamlConfiguration yaml = new YamlConfiguration();
                 yaml.load(file);
                 Set<String> keys = yaml.getKeys(false);
-                APlugin.getInstance().info("Key List {}", keys);
                 for (String key : keys) {
                     ConfigurationSection section = yaml.getConfigurationSection(key);
                     WorldRegenerationData worldData = section == null

@@ -12,14 +12,12 @@ public class WorldRegenerationData {
     private final List<String> chunksToRegen;
 
     WorldRegenerationData() {
-        APlugin.getInstance().info("Empty constructor");
         this.chunksToRegen = new LinkedList<>();
     }
 
     WorldRegenerationData(ConfigurationSection section) {
         this.lastRegeneration = section.getLong("lastRegeneration");
         this.chunksToRegen = section.getStringList("chunksToRegen");
-        APlugin.getInstance().info("Section constructor {}", this.chunksToRegen.size());
     }
 
     public long getLastRegeneration() {
@@ -40,7 +38,6 @@ public class WorldRegenerationData {
 
     void removeChunks(Collection<ChunkInFile> chunks) {
         this.chunksToRegen.removeAll(convertToString(chunks));
-        APlugin.getInstance().info("New size {}", this.chunksToRegen.size());
     }
 
     /**
