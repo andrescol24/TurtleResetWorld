@@ -19,7 +19,6 @@ public class TimeCalculator {
         List<ChunkInFile> chunksToRegen = new LinkedList<>();
         for(World world : worlds) {
             WorldFilesProcess process = new WorldFilesProcess(world);
-            process.run(false);
             chunksToRegen.addAll(process.getChunksToRegen());
         }
 

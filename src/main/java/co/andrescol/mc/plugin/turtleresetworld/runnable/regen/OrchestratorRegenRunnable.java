@@ -53,7 +53,7 @@ public class OrchestratorRegenRunnable extends OrchestratorRunnable {
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
             WorldFilesProcess filesResult = new WorldFilesProcess(world);
-            filesResult.run(true);
+            filesResult.deleteRegionsUnclaimed();
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
             this.totalChunks = this.totalChunks + chunkToRegen.size();
             dataManager.addChunks(world, chunkToRegen);

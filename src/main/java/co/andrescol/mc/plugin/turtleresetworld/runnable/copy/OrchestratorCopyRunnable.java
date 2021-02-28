@@ -29,24 +29,20 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
     public void run() {
         this.lock.lock();
         APlugin plugin = APlugin.getInstance();
-        plugin.info("Starting regeneration of worlds");
         try {
             this.executeTasks();
+            plugin.info("The regeneration has Finished!");
         } catch (Exception e) {
             plugin.error("Error running the regeneration thread", e);
         } finally {
             this.lock.unlock();
         }
-        plugin.info("The regeneration has Finished!");
-        RestartServerRunnable restartServerRunnable = new RestartServerRunnable();
-        restartServerRunnable.runTask(plugin);
     }
 
     /**
      * This method run all of task to regenerate all worlds.
      * First it going to delete the region file without claimed chunks using the class {@link WorldFilesProcess}.
      * Then it going to create the temporal world, regen chunks, and delete temporal worlds
-     *
      */
     private void executeTasks() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
@@ -56,7 +52,7 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
         Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
             WorldFilesProcess filesResult = new WorldFilesProcess(world);
-            filesResult.run(true);
+            filesResult.deleteRegionsUnclaimed();
             List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
             this.totalChunks = this.totalChunks + chunkToRegen.size();
             dataManager.addChunks(world, chunkToRegen);
@@ -72,7 +68,7 @@ public class OrchestratorCopyRunnable extends OrchestratorRunnable {
             task.runTaskLater(plugin, delay);
             this.condition.await();
 
-            if(task instanceof RegenChunkRunnable) {
+            if (task instanceof RegenChunkRunnable) {
                 RegenChunkRunnable runnable = (RegenChunkRunnable) task;
                 dataManager.removeChunks(runnable.getReal(), runnable.getChunks());
             }

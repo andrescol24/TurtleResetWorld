@@ -12,6 +12,7 @@ public class ChunkInFile implements Serializable {
     private final int z;
     private final boolean protectedChunk;
     private final int arrayPosition;
+    private long modificationTimeStamp;
 
     public  ChunkInFile(int x, int z, boolean isProtected) {
         this.x = x;
@@ -34,6 +35,14 @@ public class ChunkInFile implements Serializable {
 
     public int getArrayPosition() {
         return arrayPosition;
+    }
+
+    public long getModificationTimeStamp() {
+        return modificationTimeStamp;
+    }
+
+    public void setModificationTimeStamp(long modificationTimeStamp) {
+        this.modificationTimeStamp = modificationTimeStamp;
     }
 
     @Override
