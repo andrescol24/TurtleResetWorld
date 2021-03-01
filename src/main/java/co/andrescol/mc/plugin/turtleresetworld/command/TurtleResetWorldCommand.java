@@ -2,10 +2,7 @@ package co.andrescol.mc.plugin.turtleresetworld.command;
 
 import java.util.List;
 
-import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.CalcTimeRegenSubCommand;
-import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.CreateWorldSubCommand;
-import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.RegenWorldSubCommand;
-import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.TpSubCommand;
+import co.andrescol.mc.plugin.turtleresetworld.command.subcommand.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
@@ -18,6 +15,7 @@ public class TurtleResetWorldCommand extends AMainCommand {
 		this.addSubCommand(new TpSubCommand());
 		this.addSubCommand(new CalcTimeRegenSubCommand());
 		this.addSubCommand(new CreateWorldSubCommand());
+		this.addSubCommand(new CopyPasteSubCommand());
 	}
 
 	@Override

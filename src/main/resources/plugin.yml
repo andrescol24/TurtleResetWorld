@@ -4,6 +4,8 @@ main: co.andrescol.mc.plugin.turtleresetworld.TurtleResetWorldPlugin
 description: With this plugin you can reset automatically worlds
 softdepend:
   - GriefPrevention
+depend:
+  - WorldEdit
 author: xX_andrescol_Xx
 api-version: 1.16 
 website: none
