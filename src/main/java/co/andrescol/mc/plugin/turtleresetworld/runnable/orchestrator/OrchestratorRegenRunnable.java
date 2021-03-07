@@ -1,14 +1,20 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.data.FileName;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.CreateWorldRunnable;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.data.WorldRegenerationData;
+import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.beforeregen.CreateWorldRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.postregen.DeleteWorldRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.postregen.UnRegisterEventRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.RegenChunkRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -17,28 +23,35 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class OrchestratorRegenRunnable extends OrchestratorRunnable {
 
-    protected final List<World> worldsToRegen;
+    private final List<World> worldsToRegen;
+    private final AntiPlayerJoinListener listener;
 
-    public OrchestratorRegenRunnable(List<World> worldsToRegen) {
+    /**
+     * Create an instance of this orchestrator
+     *
+     * @param worldsToRegen Worlds to regen
+     * @param listener      AntiPlayerJoinListener that going to be unregister after the regneration
+     */
+    public OrchestratorRegenRunnable(List<World> worldsToRegen, AntiPlayerJoinListener listener) {
         super();
         this.worldsToRegen = worldsToRegen;
+        this.listener = listener;
+        this.totalChunks = 0;
     }
 
     @Override
     public void run() {
-        this.lock.lock();
         APlugin plugin = APlugin.getInstance();
-        plugin.info("Starting regeneration of worlds");
+        this.lock.lock();
         try {
             this.executeTasks();
         } catch (Exception e) {
-            plugin.error("Error running the regeneration thread", e);
+            plugin.error("There was an error running the OrchestratorRegen", e);
         } finally {
             this.lock.unlock();
         }
-        plugin.info("The regeneration has Finished!");
-        RestartServerRunnable restartServerRunnable = new RestartServerRunnable();
-        restartServerRunnable.runTask(plugin);
+        UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(listener);
+        unRegisterEventRunnable.runTask(plugin);
     }
 
     /**
@@ -52,30 +65,20 @@ public class OrchestratorRegenRunnable extends OrchestratorRunnable {
         RegenerationDataManager dataManager = RegenerationDataManager
                 .getInstance(FileName.FILE_NAME_REGEN);
 
-        this.totalChunks = 0;
-        Queue<SynchronizeRunnable> executables = new LinkedList<>();
         for (World world : this.worldsToRegen) {
-            WorldFilesProcess filesResult = new WorldFilesProcess(world);
-            filesResult.deleteRegionsUnclaimed();
-            List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
-            this.totalChunks = this.totalChunks + chunkToRegen.size();
-            dataManager.addChunks(world, chunkToRegen);
-
-            List<SynchronizeRunnable> executablesForWorld = this.getWorldExecutables(world, chunkToRegen);
-            executables.addAll(executablesForWorld);
-        }
-
-        long delay = plugin.getConfig().getLong("timeOfGraceForServer.chunkRegen");
-        plugin.info("\n------ Starting regeneration: chunks to regen {} on {} process---------",
-                this.totalChunks, executables.size());
-        for (SynchronizeRunnable task : executables) {
-            task.runTaskLater(plugin, delay);
-            this.condition.await();
-
-            if(task instanceof RegenChunkRunnable) {
-                RegenChunkRunnable runnable = (RegenChunkRunnable) task;
-                dataManager.removeChunks(runnable.getReal(), runnable.getChunks());
+            // We get the chunks to save the schematic
+            WorldRegenerationData data = dataManager.getDataOf(world);
+            WorldFilesProcess worldProcess = new WorldFilesProcess(world);
+            List<ChunkInFile> chunksForSave;
+            if(data.getChunksToSaveSchematic().isEmpty()) {
+                chunksForSave = worldProcess.getProtectedChunks();
+            } else {
+                chunksForSave = data.getChunksToSaveSchematic();
             }
+            worldProcess.deleteRegionsUnclaimed();
+//            List<ChunkInFile> chunkToRegen = filesResult.getChunksToRegen();
+//            this.totalChunks = this.totalChunks + chunkToRegen.size();
+//            dataManager.addChunks(world, chunkToRegen);
         }
     }
 

@@ -1,4 +1,4 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.copy;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.postregen;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;

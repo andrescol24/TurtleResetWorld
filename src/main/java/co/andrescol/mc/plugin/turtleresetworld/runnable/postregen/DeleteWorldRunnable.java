@@ -1,7 +1,7 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable.regen;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.postregen;
 
 import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
 import org.bukkit.World;
 

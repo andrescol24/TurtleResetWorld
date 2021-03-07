@@ -1,6 +1,5 @@
 package co.andrescol.mc.plugin.turtleresetworld.data;
 
-import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -9,23 +8,26 @@ import java.util.*;
 public class WorldRegenerationData {
 
     private long lastRegeneration;
-    private final List<String> chunksToRegen;
+    private final List<String> chunksToSaveSchematic;
+    private final List<String> chunksToLoadSchematic;
 
     WorldRegenerationData() {
-        this.chunksToRegen = new LinkedList<>();
+        this.chunksToSaveSchematic = new LinkedList<>();
+        this.chunksToLoadSchematic = new LinkedList<>();
     }
 
     WorldRegenerationData(ConfigurationSection section) {
         this.lastRegeneration = section.getLong("lastRegeneration");
-        this.chunksToRegen = section.getStringList("chunksToRegen");
+        this.chunksToSaveSchematic = section.getStringList("chunksToSaveSchematic");
+        this.chunksToLoadSchematic = section.getStringList("chunksToLoadSchematic");
     }
 
     public long getLastRegeneration() {
         return lastRegeneration;
     }
 
-    public List<ChunkInFile> getChunksToRegen() {
-        return convertToChunk(this.chunksToRegen);
+    public List<ChunkInFile> getChunksToSaveSchematic() {
+        return convertToChunk(this.chunksToSaveSchematic);
     }
 
     void setLastRegeneration(long lastRegeneration) {
@@ -33,11 +35,11 @@ public class WorldRegenerationData {
     }
 
     void addChunks(Collection<ChunkInFile> chunks) {
-        this.chunksToRegen.addAll(convertToString(chunks));
+        this.chunksToSaveSchematic.addAll(convertToString(chunks));
     }
 
     void removeChunks(Collection<ChunkInFile> chunks) {
-        this.chunksToRegen.removeAll(convertToString(chunks));
+        this.chunksToSaveSchematic.removeAll(convertToString(chunks));
     }
 
     /**
@@ -77,7 +79,7 @@ public class WorldRegenerationData {
     public Map<?,?> toHashMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("lastRegeneration", this.lastRegeneration);
-        result.put("chunksToRegen", this.chunksToRegen);
+        result.put("chunksToRegen", this.chunksToSaveSchematic);
         return result;
     }
 }

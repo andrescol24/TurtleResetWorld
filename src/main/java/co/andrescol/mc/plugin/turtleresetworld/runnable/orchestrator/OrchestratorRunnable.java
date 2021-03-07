@@ -1,4 +1,4 @@
-package co.andrescol.mc.plugin.turtleresetworld.runnable;
+package co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator;
 
 import org.bukkit.scheduler.BukkitRunnable;
 

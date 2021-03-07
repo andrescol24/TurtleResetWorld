@@ -78,6 +78,18 @@ public class WorldFilesProcess {
         }
     }
 
+    public void deleteAllRegions() {
+        APlugin plugin = APlugin.getInstance();
+        for (RegionInFile region : this.regions) {
+            boolean deleted = region.deleteFile();
+            if (deleted) {
+                plugin.info("{} file was deleted", region);
+            } else {
+                plugin.warn("{} file was not deleted", region);
+            }
+        }
+    }
+
     /**
      * Get the list of loaded regions in the world reading the region folder
      *

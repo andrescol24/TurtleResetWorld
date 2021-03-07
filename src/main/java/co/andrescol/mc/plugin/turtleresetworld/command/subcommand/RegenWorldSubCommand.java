@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.OrchestratorRegenRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorRegenRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -39,9 +39,8 @@ public class RegenWorldSubCommand extends ASubCommand {
         List<World> worlds = PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
                 : List.of(Bukkit.getWorld(worldParam));
-        OrchestratorRegenRunnable runnable = new OrchestratorRegenRunnable(worlds);
+        OrchestratorRegenRunnable runnable = new OrchestratorRegenRunnable(worlds, listener);
         runnable.runTaskAsynchronously(plugin);
-        plugin.info("Starting worlds regeneration");
         return true;
     }
 
