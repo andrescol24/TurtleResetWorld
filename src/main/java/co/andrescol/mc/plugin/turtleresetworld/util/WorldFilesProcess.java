@@ -12,15 +12,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * This runnable is going to regen only the regions without claimed chunks.
- * The chunks that need to be regenerated can be accessed with the method
- * {@link WorldFilesProcess#getChunksToRegen()}
- */
 public class WorldFilesProcess {
 
-    private final World world;
-    private final List<RegionInFile> regions;
+    private List<RegionInFile> regions;
 
     /**
      * create an instance of the world
@@ -28,13 +22,12 @@ public class WorldFilesProcess {
      * @param worldToRegen World that will be regenerated
      */
     public WorldFilesProcess(World worldToRegen) {
-        this.world = worldToRegen;
-        this.regions = new LinkedList<>();
         APlugin plugin = APlugin.getInstance();
         try {
-            this.regions.addAll(this.getRegionsInWorldFolder());
+            this.regions = this.getRegionsInWorldFolder(worldToRegen);
         } catch (Exception e) {
-            plugin.error("Error during the world {} regen", e, world.getName());
+            this.regions = new LinkedList<>();
+            plugin.error("Error during the world {} regen", e, worldToRegen.getName());
         }
     }
 
@@ -43,7 +36,7 @@ public class WorldFilesProcess {
      *
      * @return List with the unclaimed chunks
      */
-    public List<ChunkInFile> getChunksToRegen() {
+    public List<ChunkInFile> getUnProtectedChunks() {
         List<ChunkInFile> chunks = new LinkedList<>();
         for (RegionInFile region : this.regions) {
             chunks.addAll(region.getUnclaimedChunks());
@@ -64,21 +57,7 @@ public class WorldFilesProcess {
         return chunks;
     }
 
-    public void deleteRegionsUnclaimed() {
-        APlugin plugin = APlugin.getInstance();
-        for (RegionInFile region : this.regions) {
-            if (!region.hasClaimedChunks()) {
-                boolean deleted = region.deleteFile();
-                if (deleted) {
-                    plugin.info("{} file was deleted", this);
-                } else {
-                    plugin.warn("{} file was not deleted", this);
-                }
-            }
-        }
-    }
-
-    public void deleteAllRegions() {
+    public void deleteAllRegionsFile() {
         APlugin plugin = APlugin.getInstance();
         for (RegionInFile region : this.regions) {
             boolean deleted = region.deleteFile();
@@ -93,15 +72,19 @@ public class WorldFilesProcess {
     /**
      * Get the list of loaded regions in the world reading the region folder
      *
+     * @param world World to process
      * @return List of regions
      * @throws IOException Throws it if there is an error reading the region file
      */
-    private List<RegionInFile> getRegionsInWorldFolder() throws IOException {
+    private List<RegionInFile> getRegionsInWorldFolder(World world) throws IOException {
         List<RegionInFile> regions = new LinkedList<>();
-        File regionFolder = this.getRegionFolder();
+        File regionFolder = this.getRegionFolder(world);
         if (regionFolder.exists()) {
             File[] files = Objects.requireNonNull(regionFolder.listFiles());
-            List<Chunk> claimedChunks = this.getClaimedChunks();
+            List<Chunk> claimedChunks = TurtleResetWorldPlugin.getChunksClaimedByHooks()
+                    .stream()
+                    .filter(chunk -> chunk.getWorld().equals(world))
+                    .collect(Collectors.toList());
             for (File file : files) {
                 RegionInFile region = new RegionInFile(file, claimedChunks);
                 regions.add(region);
@@ -116,12 +99,13 @@ public class WorldFilesProcess {
     /**
      * Gets the region folder depending on the World's Environment
      *
+     * @param world World to process
      * @return The region folder
      */
-    private File getRegionFolder() {
-        File worldDirectory = this.world.getWorldFolder();
+    private File getRegionFolder(World world) {
+        File worldDirectory = world.getWorldFolder();
         String regionPath;
-        switch (this.world.getEnvironment()) {
+        switch (world.getEnvironment()) {
             case NETHER:
                 regionPath = "DIM-1" + File.separator + "region";
                 break;
@@ -132,16 +116,5 @@ public class WorldFilesProcess {
                 regionPath = "region";
         }
         return new File(worldDirectory, regionPath);
-    }
-
-    /**
-     * Gets the list of the claimed chunks in the world
-     *
-     * @return List of claimed chunks
-     */
-    private List<Chunk> getClaimedChunks() {
-        List<Chunk> chunks = TurtleResetWorldPlugin.getChunksClaimedByHooks();
-        return chunks.stream()
-                .filter(chunk -> chunk.getWorld().equals(this.world)).collect(Collectors.toList());
     }
 }

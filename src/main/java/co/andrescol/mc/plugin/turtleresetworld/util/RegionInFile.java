@@ -1,5 +1,6 @@
 package co.andrescol.mc.plugin.turtleresetworld.util;
 
+import co.andrescol.mc.library.plugin.APlugin;
 import org.bukkit.Chunk;
 
 import java.io.File;
@@ -117,7 +118,6 @@ public class RegionInFile {
         for (int i = 0; i < this.timestamp.length; i++) {
             this.timestamp[i] = raf.readInt();
         }
-
         List<Chunk> protectedChunkRegion = this.filterClaimedChunks(protectedChunksWorld);
 
         // 32*X <= xChunk < 32*X + 32 -> Inequality of floor(x/32)
@@ -131,7 +131,7 @@ public class RegionInFile {
                 int timestampChunk = timestamp[arrayPosition];
 
                 // location == 0 means that the chunk isn't charged
-                if (location != 0 && timestampChunk != 0) {
+                if (isProtectedChunk || (location != 0 && timestampChunk != 0)) {
                     chunkRegion.setModificationTimeStamp(timestampChunk);
                     chunks.add(chunkRegion);
                 }

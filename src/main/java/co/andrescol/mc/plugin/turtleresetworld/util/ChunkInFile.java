@@ -47,8 +47,8 @@ public class ChunkInFile implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("[%d/%d]: protected: %b",
-                this.x, this.z, this.protectedChunk);
+        return String.format("[%d/%d]",
+                this.x, this.z);
     }
 
     @Override

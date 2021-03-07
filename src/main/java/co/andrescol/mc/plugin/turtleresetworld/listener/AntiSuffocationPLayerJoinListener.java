@@ -3,7 +3,6 @@ package co.andrescol.mc.plugin.turtleresetworld.listener;
 import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.data.FileName;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.data.WorldRegenerationData;
 import org.bukkit.Bukkit;
@@ -20,9 +19,8 @@ public class AntiSuffocationPLayerJoinListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent event) {
         APlugin plugin = APlugin.getInstance();
 
-
         RegenerationDataManager dataManager = RegenerationDataManager
-                .getInstance(FileName.FILE_NAME_COPY);
+                .getInstance();
         WorldRegenerationData data = dataManager.getDataOf(event.getPlayer().getWorld());
 
         long lastRegen = data.getLastRegeneration();

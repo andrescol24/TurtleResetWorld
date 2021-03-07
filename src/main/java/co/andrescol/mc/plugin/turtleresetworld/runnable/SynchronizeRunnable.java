@@ -2,6 +2,7 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -34,7 +35,7 @@ public abstract class SynchronizeRunnable extends BukkitRunnable {
      * locked. Then the the process will throw a signal to the orchestrator to
      * continue.
      */
-    protected abstract void execute();
+    protected abstract void execute() throws Exception;
 
     /**
      * Get the time that the runnable will be wait to execute its code

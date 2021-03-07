@@ -26,20 +26,32 @@ public class WorldRegenerationData {
         return lastRegeneration;
     }
 
-    public List<ChunkInFile> getChunksToSaveSchematic() {
-        return convertToChunk(this.chunksToSaveSchematic);
-    }
-
     void setLastRegeneration(long lastRegeneration) {
         this.lastRegeneration = lastRegeneration;
     }
 
-    void addChunks(Collection<ChunkInFile> chunks) {
+    public List<ChunkInFile> getChunksToSaveSchematic() {
+        return convertToChunk(this.chunksToSaveSchematic);
+    }
+
+    void addChunksToSaveSchematic(Collection<ChunkInFile> chunks) {
         this.chunksToSaveSchematic.addAll(convertToString(chunks));
     }
 
-    void removeChunks(Collection<ChunkInFile> chunks) {
+    void removeChunksToSaveSchematic(Collection<ChunkInFile> chunks) {
         this.chunksToSaveSchematic.removeAll(convertToString(chunks));
+    }
+
+    public List<ChunkInFile> getChunksToLoadSchematic() {
+        return convertToChunk(this.chunksToLoadSchematic);
+    }
+
+    void addChunksToLoadSchematics(Collection<ChunkInFile> chunks) {
+        this.chunksToLoadSchematic.addAll(convertToString(chunks));
+    }
+
+    void removeChunksToLoadSchematics(Collection<ChunkInFile> chunks) {
+        this.chunksToLoadSchematic.removeAll(convertToString(chunks));
     }
 
     /**
@@ -79,7 +91,8 @@ public class WorldRegenerationData {
     public Map<?,?> toHashMap() {
         Map<String, Object> result = new HashMap<>();
         result.put("lastRegeneration", this.lastRegeneration);
-        result.put("chunksToRegen", this.chunksToSaveSchematic);
+        result.put("chunksToSaveSchematic", this.chunksToSaveSchematic);
+        result.put("chunksToLoadSchematic", this.chunksToLoadSchematic);
         return result;
     }
 }

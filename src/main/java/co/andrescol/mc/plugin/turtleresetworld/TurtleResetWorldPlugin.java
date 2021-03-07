@@ -1,5 +1,8 @@
 package co.andrescol.mc.plugin.turtleresetworld;
 
+import co.andrescol.mc.library.plugin.APlugin;
+import co.andrescol.mc.plugin.turtleresetworld.command.TurtleResetWorldCommand;
+import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiSuffocationPLayerJoinListener;
@@ -7,13 +10,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.event.HandlerList;
 
-import co.andrescol.mc.library.plugin.APlugin;
-import co.andrescol.mc.plugin.turtleresetworld.command.TurtleResetWorldCommand;
-
 import java.util.LinkedList;
 import java.util.List;
 
-public class TurtleResetWorldPlugin extends APlugin{
+public class TurtleResetWorldPlugin extends APlugin {
 	
 	@Override
 	public void onEnable() {
@@ -22,6 +22,7 @@ public class TurtleResetWorldPlugin extends APlugin{
 			AntiSuffocationPLayerJoinListener listener = new AntiSuffocationPLayerJoinListener();
 			this.getServer().getPluginManager().registerEvents(listener, this);
 		}
+		RegenerationDataManager.getInstance().readData();
 	}
 
 	@Override
