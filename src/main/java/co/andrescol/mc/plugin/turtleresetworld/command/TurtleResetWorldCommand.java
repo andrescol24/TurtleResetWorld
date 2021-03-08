@@ -11,7 +11,7 @@ import co.andrescol.mc.library.command.AMainCommand;
 public class TurtleResetWorldCommand extends AMainCommand {
 
 	public TurtleResetWorldCommand() {
-		this.addSubCommand(new RegenWorldSubCommand());
+		this.addSubCommand(new RegenSubCommand());
 		this.addSubCommand(new TpSubCommand());
 		this.addSubCommand(new CalcTimeRegenSubCommand());
 		this.addSubCommand(new CopyPasteSubCommand());

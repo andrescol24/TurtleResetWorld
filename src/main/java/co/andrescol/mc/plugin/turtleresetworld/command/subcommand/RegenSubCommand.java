@@ -4,7 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.andrescol.mc.library.utils.AUtils;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorRegenRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorSaveSchematicsRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.SaveSchematicChunkRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.Command;
@@ -15,11 +16,11 @@ import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
 
-public class RegenWorldSubCommand extends ASubCommand {
+public class RegenSubCommand extends ASubCommand {
 
     public static final String PARAM_ALL = "all";
 
-    public RegenWorldSubCommand() {
+    public RegenSubCommand() {
         super("regen", "turtleresetworld.regen");
     }
 
@@ -39,7 +40,7 @@ public class RegenWorldSubCommand extends ASubCommand {
         List<World> worlds = PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
                 : List.of(Bukkit.getWorld(worldParam));
-        OrchestratorRegenRunnable runnable = new OrchestratorRegenRunnable(worlds, listener);
+        OrchestratorSaveSchematicsRunnable runnable = new OrchestratorSaveSchematicsRunnable(worlds);
         runnable.runTaskAsynchronously(plugin);
         return true;
     }

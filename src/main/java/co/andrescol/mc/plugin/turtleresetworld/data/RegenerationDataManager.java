@@ -2,6 +2,7 @@ package co.andrescol.mc.plugin.turtleresetworld.data;
 
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
+import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -9,10 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This class allow to save data in a YAML file
@@ -86,6 +84,18 @@ public class RegenerationDataManager {
     public void setContinueLoading(boolean continueLoading) {
         this.continueLoading = continueLoading;
         this.saveData();
+    }
+
+    public List<World> getListWorldsPending() {
+        List<World> worlds = new LinkedList<>();
+        for(String key : this.chunksData.keySet()) {
+            WorldRegenerationData data = this.chunksData.get(key);
+            if(!data.getChunksToLoadSchematic().isEmpty()) {
+                World world = Bukkit.getWorld(key);
+                worlds.add(world);
+            }
+        }
+        return worlds;
     }
 
     public void readData() {

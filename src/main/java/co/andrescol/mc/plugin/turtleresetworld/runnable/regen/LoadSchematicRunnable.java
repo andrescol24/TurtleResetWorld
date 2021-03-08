@@ -8,27 +8,27 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.extent.clipboard.BlockArrayClipboard;
-import com.sk89q.worldedit.extent.clipboard.io.BuiltInClipboardFormat;
-import com.sk89q.worldedit.extent.clipboard.io.ClipboardWriter;
-import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormat;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardFormats;
+import com.sk89q.worldedit.extent.clipboard.io.ClipboardReader;
+import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
-import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import org.bukkit.World;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
+public class LoadSchematicRunnable extends SynchronizeRunnable {
 
     private final ConcurrentLinkedDeque<ChunkInFile> chunks;
     private final World world;
-    private boolean success;
 
-    public SaveSchematicChunkRunnable(OrchestratorRunnable orchestrator,
+    public LoadSchematicRunnable(OrchestratorRunnable orchestrator,
                                       ConcurrentLinkedDeque<ChunkInFile> chunks, World world) {
         super(orchestrator);
         this.chunks = chunks;
@@ -39,10 +39,9 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
     protected void execute() throws Exception {
         APlugin plugin = APlugin.getInstance();
         for (ChunkInFile chunk : this.chunks) {
-            plugin.info("Saving {} chunk schematic", chunk);
-            this.saveSchematic(chunk);
+            plugin.info("Loading {} chunk schematic", chunk);
+            this.loadSchematic(chunk);
         }
-        this.success = true;
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());
         plugin.info("{} chunks left!", this.orchestrator.getTotalChunks());
     }
@@ -54,30 +53,29 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
      * @throws WorldEditException Threw if there was an error completing the operation
      * @throws IOException        Threw if there was an error saving the file
      */
-    private void saveSchematic(ChunkInFile chunk) throws WorldEditException, IOException {
-        BlockVector3[] positions = this.getLocations(chunk); // Gets the positions of the region to copy
+    private void loadSchematic(ChunkInFile chunk) throws WorldEditException, IOException {
         com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(this.world);
-        CuboidRegion regionFrom = new CuboidRegion(world, positions[0], positions[1]);
-        BlockArrayClipboard clipboard = new BlockArrayClipboard(regionFrom);
 
-        try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {
-            ForwardExtentCopy forwardExtentCopy = new ForwardExtentCopy(
-                    editSession, regionFrom, clipboard, regionFrom.getMinimumPoint());
-            forwardExtentCopy.setCopyingBiomes(true);
-            forwardExtentCopy.setCopyingEntities(true);
-            Operations.complete(forwardExtentCopy);
-        }
-
+        // Load the schematic
         String fileName = "schematics" + File.separator + world.getName() + File.separator + chunk.getX() +
                 "_" + chunk.getZ() + ".schem";
         File file = new File(APlugin.getInstance().getDataFolder(), fileName);
-        if(!file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
+        Clipboard clipboard;
+        ClipboardFormat format = ClipboardFormats.findByFile(file);
+        try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
+            clipboard = reader.read();
         }
-        file.createNewFile();
 
-        try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file))) {
-            writer.write(clipboard);
+        // Copy the schematic
+        BlockVector3[] positions = this.getLocations(chunk);
+        try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {
+            Operation operation = new ClipboardHolder(clipboard)
+                    .createPaste(editSession)
+                    .to(positions[0])
+                    .copyBiomes(true)
+                    .copyEntities(true)
+                    .build();
+            Operations.complete(operation);
         }
     }
 
@@ -98,10 +96,6 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
         y = 255;
         BlockVector3 max = BlockVector3.at(x, y, z);
         return new BlockVector3[]{min, max};
-    }
-
-    public boolean isSuccess() {
-        return success;
     }
 
     public ConcurrentLinkedDeque<ChunkInFile> getChunks() {

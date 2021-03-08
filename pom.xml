@@ -105,7 +105,7 @@
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.0</version>
 				<configuration>
-					<outputDirectory>C:\Users\User\Documents\Minecraft Server\plugins</outputDirectory>
+					<outputDirectory>C:\Users\User\Documents\MinecraftServer\plugins</outputDirectory>
 				</configuration>
 			</plugin>
 		</plugins>

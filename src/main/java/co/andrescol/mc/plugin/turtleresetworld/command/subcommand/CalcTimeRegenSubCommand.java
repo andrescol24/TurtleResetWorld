@@ -23,7 +23,7 @@ public class CalcTimeRegenSubCommand extends ASubCommand {
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         // Get Worlds to reset
         String worldParam = AUtils.getArgument(1, args);
-        List<World> worlds = RegenWorldSubCommand.PARAM_ALL.equals(worldParam)
+        List<World> worlds = RegenSubCommand.PARAM_ALL.equals(worldParam)
                 ? Bukkit.getWorlds()
                 : List.of(Objects.requireNonNull(Bukkit.getWorld(worldParam)));
         TimeCalculator calculator = new TimeCalculator();
