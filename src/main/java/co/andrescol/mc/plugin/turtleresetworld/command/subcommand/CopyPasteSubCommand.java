@@ -14,6 +14,9 @@ import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.session.ClipboardHolder;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -31,8 +34,12 @@ public class CopyPasteSubCommand extends ASubCommand {
     public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
         String[] chunkFrom = args[1].split("/");
         String[] chunkTo = args[2].split("/");
-        Player player = (Player) commandSender;
-        com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(player.getWorld());
+        World bworld = Bukkit.getWorld("world");
+
+        Chunk chunk = bworld.getChunkAt(Integer.parseInt(chunkFrom[0]), Integer.parseInt(chunkFrom[1]));
+        chunk.load();
+
+        com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(bworld);
 
         BlockVector3[] fromPositions = this.getLocations(chunkFrom);
         CuboidRegion regionFrom = new CuboidRegion(world, fromPositions[0], fromPositions[1]);
@@ -48,6 +55,7 @@ public class CopyPasteSubCommand extends ASubCommand {
             AUtils.sendMessage(commandSender, "No se pudo copiar el chunk");
             return true;
         }
+        APlugin.getInstance().info("Entities copying: {}", clipboard.getEntities().size());
 
         BlockVector3[] toPositions = this.getLocations(chunkTo);
         try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {

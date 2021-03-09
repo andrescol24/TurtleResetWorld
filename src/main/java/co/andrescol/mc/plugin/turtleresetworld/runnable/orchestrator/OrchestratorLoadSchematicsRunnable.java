@@ -46,8 +46,9 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
             for(LoadSchematicRunnable runnable : executables) {
                 runnable.runTaskLater(plugin, runnable.getDelay());
                 this.condition.await();
+                dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
             }
-
+            dataManager.setContinueLoading(false);
         } catch (Exception e) {
             plugin.error("There was an error running the OrchestratorRegen", e);
         } finally {

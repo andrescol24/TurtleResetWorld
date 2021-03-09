@@ -65,6 +65,7 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))) {
             clipboard = reader.read();
         }
+        APlugin.getInstance().info("Entities loading: {}", clipboard.getEntities().size());
 
         // Copy the schematic
         BlockVector3[] positions = this.getLocations(chunk);

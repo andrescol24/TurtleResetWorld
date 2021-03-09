@@ -15,6 +15,7 @@ import com.sk89q.worldedit.function.operation.ForwardExtentCopy;
 import com.sk89q.worldedit.function.operation.Operations;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import org.bukkit.Chunk;
 import org.bukkit.World;
 
 import java.io.File;
@@ -58,8 +59,9 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
         BlockVector3[] positions = this.getLocations(chunk); // Gets the positions of the region to copy
         com.sk89q.worldedit.world.World world = BukkitAdapter.adapt(this.world);
         CuboidRegion regionFrom = new CuboidRegion(world, positions[0], positions[1]);
+        Chunk minecraftChunk = this.world.getChunkAt(chunk.getX(), chunk.getZ());
+        minecraftChunk.load();
         BlockArrayClipboard clipboard = new BlockArrayClipboard(regionFrom);
-
         try (EditSession editSession = WorldEdit.getInstance().newEditSessionBuilder().world(world).build()) {
             ForwardExtentCopy forwardExtentCopy = new ForwardExtentCopy(
                     editSession, regionFrom, clipboard, regionFrom.getMinimumPoint());
@@ -67,6 +69,7 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
             forwardExtentCopy.setCopyingEntities(true);
             Operations.complete(forwardExtentCopy);
         }
+        minecraftChunk.unload();
 
         String fileName = "schematics" + File.separator + world.getName() + File.separator + chunk.getX() +
                 "_" + chunk.getZ() + ".schem";
@@ -75,6 +78,7 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
             file.getParentFile().mkdirs();
         }
         file.createNewFile();
+        APlugin.getInstance().info("Entities saving: {}", clipboard.getEntities().size());
 
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);
