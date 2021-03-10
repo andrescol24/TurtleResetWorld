@@ -78,7 +78,6 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
             file.getParentFile().mkdirs();
         }
         file.createNewFile();
-        APlugin.getInstance().info("Entities saving: {}", clipboard.getEntities().size());
 
         try (ClipboardWriter writer = BuiltInClipboardFormat.SPONGE_SCHEMATIC.getWriter(new FileOutputStream(file))) {
             writer.write(clipboard);

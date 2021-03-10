@@ -5,6 +5,8 @@ safeOfSuffocation:
     x: 0
     y: 70
     z: 0
+    yaw: 0
+    pitch: 0
     world: world
 chunksPerThread: 40
 minYProtected: 0

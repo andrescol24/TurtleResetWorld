@@ -31,7 +31,6 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
         this.lock.lock();
         APlugin plugin = APlugin.getInstance();
         try {
-            plugin.info("Starting loading schematics");
             RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
             List<World> worldsToRegen = dataManager.getListWorldsPending();
             List<LoadSchematicRunnable> executables = new LinkedList<>();

@@ -48,10 +48,12 @@ public class AntiSuffocationPLayerJoinListener implements Listener {
         double x = configuration.getDouble("safeOfSuffocation.position.x");
         double y = configuration.getDouble("safeOfSuffocation.position.y");
         double z = configuration.getDouble("safeOfSuffocation.position.z");
+        float yaw = (float) configuration.getDouble("safeOfSuffocation.position.yaw");
+        float pitch = (float) configuration.getDouble("safeOfSuffocation.position.pitch");
         String worldName = configuration.getString("safeOfSuffocation.position.world");
         World world = Bukkit.getWorld(worldName);
         if (world != null) {
-            return new Location(world, x, y, z);
+            return new Location(world, x, y, z, yaw, pitch);
         } else {
             APlugin.getInstance().warn("Administrator please check the world name " +
                     "in the config.yml, the world {} does not exist", worldName);
