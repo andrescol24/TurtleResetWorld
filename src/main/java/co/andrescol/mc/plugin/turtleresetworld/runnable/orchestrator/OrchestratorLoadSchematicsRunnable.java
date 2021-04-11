@@ -46,6 +46,7 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
                 runnable.runTaskLater(plugin, runnable.getDelay());
                 this.condition.await();
                 dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
+                this.controlTimeoutOut();
             }
             dataManager.setContinueLoading(false);
         } catch (Exception e) {

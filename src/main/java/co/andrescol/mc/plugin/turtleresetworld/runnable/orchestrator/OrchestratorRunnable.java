@@ -79,4 +79,38 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         }
         return executables;
     }
+
+    protected void controlTimeoutOut() throws InterruptedException {
+        APlugin plugin = APlugin.getInstance();
+        int maximumTimeOut = plugin.getConfig().getInt("maximumServerTimeOut") * 1000;
+        int minimumsTimeOut = plugin.getConfig().getInt("minimumServerTimeOut") * 1000;
+
+        long total = this.runTimeChecker();
+
+        if(total > maximumTimeOut) {
+            while (total < minimumsTimeOut) {
+                plugin.warn("Waiting 10s to improve the server performance: tickets in {} ms", total);
+                Thread.sleep(10000);
+                total = this.runTimeChecker();
+            }
+        } else {
+            plugin.info("Good: actual tickets in {} ms", total);
+        }
+    }
+
+    /**
+     * Runs the TicketsCheckerRunnable to calculate the tickets of the server
+     * @return time in millis of a task of 1 second
+     */
+    private long runTimeChecker() throws InterruptedException {
+        APlugin plugin = APlugin.getInstance();
+
+        long start = System.currentTimeMillis();
+        long millis = 1000;
+        TicketsCheckerRunnable checker = new TicketsCheckerRunnable(this, millis);
+        checker.runTask(plugin);
+        this.condition.await();
+        long end = System.currentTimeMillis();
+        return end - start - millis;
+    }
 }

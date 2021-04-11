@@ -10,4 +10,5 @@ safeOfSuffocation:
     world: world
 chunksPerThread: 40
 minYProtected: 0
-maximumServerTimeOut: 50
+maximumServerTimeOut: 45
+minimumServerTimeOut: 5

@@ -8,7 +8,6 @@ import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.SaveSchematicChunk
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import co.andrescol.mc.plugin.turtleresetworld.util.WorldFilesProcess;
 import org.bukkit.World;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -85,20 +84,5 @@ public class OrchestratorSaveSchematicsRunnable extends OrchestratorRunnable {
         }
         RestartServerRunnable restartServerRunnable = new RestartServerRunnable();
         restartServerRunnable.runTask(plugin);
-    }
-
-    private void controlTimeoutOut() throws InterruptedException {
-        APlugin plugin = APlugin.getInstance();
-        int maximumTimeOut = plugin.getConfig().getInt("maximumServerTimeOut") * 1000;
-
-        long start = System.currentTimeMillis();
-        long millis = 1000;
-        TicketsCheckerRunnable checker = new TicketsCheckerRunnable(this, millis);
-        checker.runTask(plugin);
-        this.condition.await();
-        long end = System.currentTimeMillis();
-
-        long total = end - start;
-        plugin.info("Total {}, maximum {}", total, maximumTimeOut);
     }
 }
