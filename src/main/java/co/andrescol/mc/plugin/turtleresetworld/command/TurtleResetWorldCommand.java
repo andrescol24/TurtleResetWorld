@@ -14,7 +14,6 @@ public class TurtleResetWorldCommand extends AMainCommand {
 		this.addSubCommand(new RegenSubCommand());
 		this.addSubCommand(new TpSubCommand());
 		this.addSubCommand(new CalcTimeRegenSubCommand());
-		this.addSubCommand(new CopyPasteSubCommand());
 	}
 
 	@Override
