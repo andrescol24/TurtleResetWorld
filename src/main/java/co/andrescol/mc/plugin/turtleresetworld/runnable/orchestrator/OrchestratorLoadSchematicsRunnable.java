@@ -43,7 +43,7 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
 
             plugin.info("Starting process to load the schematics of {} chunks", this.totalChunks);
             for(LoadSchematicRunnable runnable : executables) {
-                runnable.runTaskLater(plugin, runnable.getDelay());
+                runnable.runTask(plugin);
                 this.condition.await();
                 dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
                 this.controlTimeoutOut();

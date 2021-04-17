@@ -22,7 +22,6 @@ public class OrchestratorSaveSchematicsRunnable extends OrchestratorRunnable {
      * @param worldsToRegen Worlds to regen
      */
     public OrchestratorSaveSchematicsRunnable(List<World> worldsToRegen) {
-        super();
         this.worldsToRegen = worldsToRegen;
         this.totalChunks = 0;
     }
@@ -59,7 +58,7 @@ public class OrchestratorSaveSchematicsRunnable extends OrchestratorRunnable {
             boolean success = true;
             plugin.info("Starting process to save the schematics of {} chunks", this.totalChunks);
             for (SaveSchematicChunkRunnable runnable : executables) {
-                runnable.runTaskLater(plugin, runnable.getDelay());
+                runnable.runTask(plugin);
                 this.condition.await();
                 if (runnable.isSuccess()) {
                     dataManager.removeChunksSaveSchematics(runnable.getWorld(), runnable.getChunks());

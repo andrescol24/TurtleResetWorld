@@ -114,9 +114,4 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
     public World getWorld() {
         return world;
     }
-
-    @Override
-    public long getDelay() {
-        return 160;
-    }
 }

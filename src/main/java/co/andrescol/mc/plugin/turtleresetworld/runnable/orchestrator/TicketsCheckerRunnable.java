@@ -1,23 +1,19 @@
 package co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator;
 
+import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.SynchronizeRunnable;
+import org.bukkit.Server;
 
 public class TicketsCheckerRunnable extends SynchronizeRunnable {
 
-    private final long millis;
-
-    public TicketsCheckerRunnable(OrchestratorRunnable orchestrator, long millis) {
+    public TicketsCheckerRunnable(OrchestratorRunnable orchestrator) {
         super(orchestrator);
-        this.millis = millis;
     }
 
     @Override
     protected void execute() throws Exception {
-        Thread.sleep(millis);
-    }
-
-    @Override
-    public long getDelay() {
-        return 0;
+        APlugin plugin = APlugin.getInstance();
+        Server server = plugin.getServer();
+        server.dispatchCommand(server.getConsoleSender(), "tps");
     }
 }

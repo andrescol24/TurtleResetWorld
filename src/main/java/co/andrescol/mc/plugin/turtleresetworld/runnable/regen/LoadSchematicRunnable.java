@@ -105,9 +105,4 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
     public World getWorld() {
         return world;
     }
-
-    @Override
-    public long getDelay() {
-        return 160;
-    }
 }
