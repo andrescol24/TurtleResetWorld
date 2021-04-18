@@ -19,6 +19,7 @@ import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
 public class RegenSubCommand extends ASubCommand {
 
     public static final String PARAM_ALL = "all";
+    private static boolean runningRegeneration = false;
 
     public RegenSubCommand() {
         super("regen", "turtleresetworld.regen");
@@ -26,6 +27,12 @@ public class RegenSubCommand extends ASubCommand {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if(runningRegeneration) {
+            String message = ALanguage.getMessage("RUNNING_REGENERATION");
+            AUtils.sendMessage(sender, message);
+            return true;
+        }
+
         APlugin plugin = APlugin.getInstance();
         // Add a listener to prevent player's join temporally
         AntiPlayerJoinListener listener = new AntiPlayerJoinListener();
@@ -42,6 +49,7 @@ public class RegenSubCommand extends ASubCommand {
                 : List.of(Bukkit.getWorld(worldParam));
         OrchestratorSaveSchematicsRunnable runnable = new OrchestratorSaveSchematicsRunnable(worlds);
         runnable.runTaskAsynchronously(plugin);
+        runningRegeneration = true;
         return true;
     }
 

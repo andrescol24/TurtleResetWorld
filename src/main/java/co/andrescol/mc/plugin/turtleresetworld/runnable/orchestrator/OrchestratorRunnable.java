@@ -57,7 +57,7 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         List<T> executables = new LinkedList<>();
         ConcurrentLinkedDeque<ChunkInFile> chunksSplit = new ConcurrentLinkedDeque<>();
         int i = 0;
-        int splitSize = APlugin.getInstance().getConfig().getInt("chunksPerThread");
+        int splitSize = 10;
         for (ChunkInFile chunkInFile : chunks) {
             chunksSplit.add(chunkInFile);
             if (i < splitSize - 1) {
@@ -89,16 +89,15 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
 
         if(total > maximumTimeOut) {
             while (total > minimumsTimeOut) {
-                plugin.warn("Waiting 10s to improve the server performance: " +
+                plugin.warn("Waiting 20s to improve the server performance: " +
                                 "[actual: {}ms, allowed: {}ms, continue with: {}ms]",
                         total,maximumTimeOut, minimumsTimeOut);
-                Thread.sleep(10000);
+                Thread.sleep(20000);
                 total = this.runTimeChecker();
             }
-        } else {
-            plugin.info("command tps ticks [actual: {}ms, allowed: {}ms, continue with: {}ms]", total,
-                    maximumTimeOut, minimumsTimeOut);
         }
+        plugin.info("command tps ticks [actual: {}ms, allowed: {}ms, continue with: {}ms]", total,
+                maximumTimeOut, minimumsTimeOut);
     }
 
     /**

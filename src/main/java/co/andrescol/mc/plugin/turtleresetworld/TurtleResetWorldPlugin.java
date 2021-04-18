@@ -53,4 +53,12 @@ public class TurtleResetWorldPlugin extends APlugin {
 		claimers.forEach(claimer -> chunks.addAll(claimer.getClaimedChunks()));
 		return chunks;
 	}
+
+	public static String getHooksList() {
+		StringBuilder builder = new StringBuilder();
+		if (Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
+			builder.append("GriefPrevention");
+		}
+		return builder.toString();
+	}
 }
