@@ -40,7 +40,7 @@ public class SaveSchematicChunkRunnable extends SynchronizeRunnable {
     protected void execute() throws Exception {
         APlugin plugin = APlugin.getInstance();
         for (ChunkInFile chunk : this.chunks) {
-            plugin.info("Saving {} - {} chunk schematic", chunk, world.getName());
+            plugin.info("Saving chunk {}, {}", chunk, world.getName());
             this.saveSchematic(chunk);
         }
         this.success = true;

@@ -89,10 +89,10 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
 
         if(total > maximumTimeOut) {
             while (total > minimumsTimeOut) {
-                plugin.warn("Waiting 20s to improve the server performance: " +
+                plugin.warn("Waiting 10s to improve the server performance: " +
                                 "[actual: {}ms, allowed: {}ms, continue with: {}ms]",
                         total,maximumTimeOut, minimumsTimeOut);
-                Thread.sleep(20000);
+                Thread.sleep(10000);
                 total = this.runTimeChecker();
             }
         }

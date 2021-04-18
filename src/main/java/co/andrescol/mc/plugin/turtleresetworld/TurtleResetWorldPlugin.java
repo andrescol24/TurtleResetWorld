@@ -29,7 +29,7 @@ public class TurtleResetWorldPlugin extends APlugin {
 			AntiPlayerJoinListener listener = new AntiPlayerJoinListener();
 			this.getServer().getPluginManager().registerEvents(listener, this);
 			OrchestratorLoadSchematicsRunnable runnable = new OrchestratorLoadSchematicsRunnable(listener);
-			runnable.runTaskLaterAsynchronously(this, 200);
+			runnable.runTaskAsynchronously(this);
 		}
 	}
 

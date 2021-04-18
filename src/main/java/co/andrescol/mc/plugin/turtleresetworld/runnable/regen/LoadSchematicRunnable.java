@@ -39,7 +39,7 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
     protected void execute() throws Exception {
         APlugin plugin = APlugin.getInstance();
         for (ChunkInFile chunk : this.chunks) {
-            plugin.info("Loading {} - {} chunk schematic", chunk, world.getName());
+            plugin.info("Loading chunk {} in {}", chunk, world.getName());
             this.loadSchematic(chunk);
         }
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());

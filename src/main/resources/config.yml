@@ -3,11 +3,11 @@ safeOfSuffocation:
   enable: true
   position:
     x: 0
-    y: 70
+    y: 80
     z: 0
     yaw: 0
     pitch: 0
     world: world
 minYProtected: 0
-maximumServerTimeOut: 10
-minimumServerTimeOut: 1
+maximumServerTimeOut: 35
+minimumServerTimeOut: 6
