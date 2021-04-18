@@ -32,19 +32,6 @@ public class WorldFilesProcess {
     }
 
     /**
-     * Get an immutable list of the chunks to regen
-     *
-     * @return List with the unclaimed chunks
-     */
-    public List<ChunkInFile> getUnProtectedChunks() {
-        List<ChunkInFile> chunks = new LinkedList<>();
-        for (RegionInFile region : this.regions) {
-            chunks.addAll(region.getUnclaimedChunks());
-        }
-        return chunks;
-    }
-
-    /**
      * Get an immutable list of protected chunks
      *
      * @return List with the claimed chunks
