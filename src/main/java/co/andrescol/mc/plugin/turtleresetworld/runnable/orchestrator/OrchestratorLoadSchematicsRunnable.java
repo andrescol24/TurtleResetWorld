@@ -3,11 +3,12 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
-import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.LoadSchematicRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.postregen.UnRegisterEventRunnable;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.LoadSchematicRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.World;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,13 +43,15 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
             }
 
             plugin.info("Starting process to load the schematics of {} chunks", this.totalChunks);
-            for(LoadSchematicRunnable runnable : executables) {
+            for (LoadSchematicRunnable runnable : executables) {
                 runnable.runTask(plugin);
                 this.condition.await();
                 dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
                 this.controlTimeoutOut();
             }
             dataManager.setContinueLoading(false);
+            File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
+            this.deleteFolder(schematicsFolder);
         } catch (Exception e) {
             plugin.error("There was an error running the OrchestratorRegen", e);
         } finally {
@@ -56,5 +59,25 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
         }
         UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(listener);
         unRegisterEventRunnable.runTask(plugin);
+    }
+
+    /**
+     * Delete a folder recursively
+     *
+     * @param folder folder
+     */
+    private void deleteFolder(File folder) {
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    this.deleteFolder(file);
+                }
+            }
+        }
+        boolean deleted = folder.delete();
+        if (!deleted) {
+            APlugin.getInstance().info("The file {} could not be deleted", folder.getAbsolutePath());
+        }
     }
 }
