@@ -3,6 +3,7 @@ package co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
+import co.andrescol.mc.plugin.turtleresetworld.runnable.postregen.RestartServerRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.postregen.UnRegisterEventRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.regen.LoadSchematicRunnable;
 import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
@@ -31,6 +32,7 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
     public void run() {
         this.lock.lock();
         APlugin plugin = APlugin.getInstance();
+        boolean success = true;
         try {
             RegenerationDataManager dataManager = RegenerationDataManager.getInstance();
             List<World> worldsToRegen = dataManager.getListWorldsPending();
@@ -43,22 +45,35 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
             }
 
             plugin.info("Starting process to load the schematics of {} chunks", this.totalChunks);
+            this.calculateTimeouts();
             for (LoadSchematicRunnable runnable : executables) {
                 runnable.runTask(plugin);
                 this.condition.await();
-                dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
-                this.controlTimeoutOut();
+                if(runnable.isSuccess()) {
+                    dataManager.removeChunksLoadSchematics(runnable.getWorld(), runnable.getChunks());
+                    this.controlTimeoutOut();
+                } else {
+                    success = false;
+                    break;
+                }
             }
-            dataManager.setContinueLoading(false);
-            File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
-            this.deleteFolder(schematicsFolder);
+            if(success) {
+                dataManager.setContinueLoading(false);
+                File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
+                this.deleteFolder(schematicsFolder);
+                UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(listener);
+                unRegisterEventRunnable.runTask(plugin);
+            }
         } catch (Exception e) {
             plugin.error("There was an error running the OrchestratorRegen", e);
         } finally {
             this.lock.unlock();
         }
-        UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(listener);
-        unRegisterEventRunnable.runTask(plugin);
+        if(!success) {
+            plugin.info("There was an error regenerating some chunks, restarting...");
+            RestartServerRunnable restartServerRunnable = new RestartServerRunnable();
+            restartServerRunnable.runTask(plugin);
+        }
     }
 
     /**

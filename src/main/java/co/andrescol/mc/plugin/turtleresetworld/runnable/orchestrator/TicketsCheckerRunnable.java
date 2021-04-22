@@ -14,6 +14,6 @@ public class TicketsCheckerRunnable extends SynchronizeRunnable {
     protected void execute() throws Exception {
         APlugin plugin = APlugin.getInstance();
         Server server = plugin.getServer();
-        server.dispatchCommand(server.getConsoleSender(), "tps");
+        server.dispatchCommand(server.getConsoleSender(), "turtle tps");
     }
 }

@@ -18,7 +18,6 @@ public class TpSubCommand extends ASubCommand {
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
-        new WorldCreator(args[1]).createWorld();
         Location location = new Location(Bukkit.getWorld(args[1]),
                 Double.parseDouble(args[2]),
                 Double.parseDouble(args[3]),  Double.parseDouble(args[4]));

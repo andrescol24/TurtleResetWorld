@@ -8,6 +8,7 @@ import co.andrescol.mc.plugin.turtleresetworld.util.ChunkInFile;
 import org.bukkit.World;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -20,6 +21,8 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
     protected final Lock lock;
     protected final Condition condition;
     protected Integer totalChunks;
+    private long maximumTimeout;
+    private long minimumTimeout;
 
     protected OrchestratorRunnable() {
         this.lock = new ReentrantLock();
@@ -80,33 +83,68 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         return executables;
     }
 
+    /**
+     * This method calculates the minimum timeout and maximum timeout to then control the timeout
+     * with that information
+     *
+     * @throws InterruptedException Throw if there was an error running threads
+     */
+    protected void calculateTimeouts() throws InterruptedException {
+        APlugin plugin = APlugin.getInstance();
+
+        long total = 0;
+        List<Long> results = new LinkedList<>();
+        for (int i = 0; i < 100; i++) {
+            long value = this.runTimeChecker();
+            total += value;
+            results.add(value);
+        }
+        Collections.sort(results);
+        long mean = total / results.size();
+        long min = results.get(0);
+        long max = results.get(results.size() -1);
+        long median = results.get((results.size() / 2) + 1);
+
+        long variance = 0;
+        for(long value : results) {
+            long range = (long) Math.ceil(Math.pow(value - mean, 2));
+            variance = variance + range;
+        }
+        variance = variance / results.size();
+        long desvstand = (long) Math.ceil(Math.sqrt(variance));
+
+        plugin.info("Stats: min: {}ms, max: {}ms, mean: {}ms, desvstand: {}ms, median: {}ms",
+                min, max, mean, desvstand, median);
+
+        this.minimumTimeout = median;
+        this.maximumTimeout = max - this.minimumTimeout > mean
+                ? this.minimumTimeout + desvstand
+                : max + desvstand;
+    }
+
     protected void controlTimeoutOut() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
-        int maximumTimeOut = plugin.getConfig().getInt("maximumServerTimeOut");
-        int minimumsTimeOut = plugin.getConfig().getInt("minimumServerTimeOut");
-
         long total = this.runTimeChecker();
-
-        if(total > maximumTimeOut) {
-            while (total > minimumsTimeOut) {
+        if (total > this.maximumTimeout) {
+            while (total > this.minimumTimeout) {
                 plugin.warn("Waiting 10s to improve the server performance: " +
                                 "[actual: {}ms, allowed: {}ms, continue with: {}ms]",
-                        total,maximumTimeOut, minimumsTimeOut);
+                        total, this.maximumTimeout, this.minimumTimeout);
                 Thread.sleep(10000);
                 total = this.runTimeChecker();
             }
         }
         plugin.info("command tps ticks [actual: {}ms, allowed: {}ms, continue with: {}ms]", total,
-                maximumTimeOut, minimumsTimeOut);
+                this.maximumTimeout, this.minimumTimeout);
     }
 
     /**
      * Runs the TicketsCheckerRunnable to calculate the tickets of the server
-     * @return time in millis of a task of 1 second
+     *
+     * @return time in millis of the task
      */
     private long runTimeChecker() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
-
         long start = System.currentTimeMillis();
         TicketsCheckerRunnable checker = new TicketsCheckerRunnable(this);
         checker.runTask(plugin);

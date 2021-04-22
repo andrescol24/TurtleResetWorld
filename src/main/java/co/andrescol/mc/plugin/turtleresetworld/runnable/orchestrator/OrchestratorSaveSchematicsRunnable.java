@@ -57,6 +57,7 @@ public class OrchestratorSaveSchematicsRunnable extends OrchestratorRunnable {
             // Run the executables for save the schematics of each protected chunk
             boolean success = true;
             plugin.info("Starting process to save the schematics of {} chunks", this.totalChunks);
+            this.calculateTimeouts();
             for (SaveSchematicChunkRunnable runnable : executables) {
                 runnable.runTask(plugin);
                 this.condition.await();

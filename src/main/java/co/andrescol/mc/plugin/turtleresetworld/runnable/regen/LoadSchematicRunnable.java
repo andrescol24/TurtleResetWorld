@@ -27,6 +27,7 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
 
     private final ConcurrentLinkedDeque<ChunkInFile> chunks;
     private final World world;
+    private boolean success;
 
     public LoadSchematicRunnable(OrchestratorRunnable orchestrator,
                                       ConcurrentLinkedDeque<ChunkInFile> chunks, World world) {
@@ -44,6 +45,7 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
         }
         this.orchestrator.setTotalChunks(this.orchestrator.getTotalChunks() - this.chunks.size());
         plugin.info("{} chunks left!", this.orchestrator.getTotalChunks());
+        this.success = true;
     }
 
     /**
@@ -104,5 +106,9 @@ public class LoadSchematicRunnable extends SynchronizeRunnable {
 
     public World getWorld() {
         return world;
+    }
+
+    public boolean isSuccess() {
+        return success;
     }
 }
