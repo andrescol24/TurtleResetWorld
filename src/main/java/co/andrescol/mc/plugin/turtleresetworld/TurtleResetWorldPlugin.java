@@ -6,7 +6,7 @@ import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.Claimer;
 import co.andrescol.mc.plugin.turtleresetworld.hooks.GriefPreventionClaimer;
 import co.andrescol.mc.plugin.turtleresetworld.listener.AntiPlayerJoinListener;
-import co.andrescol.mc.plugin.turtleresetworld.listener.AntiSuffocationPLayerJoinListener;
+import co.andrescol.mc.plugin.turtleresetworld.listener.AntiSuffocationPlayerJoinListener;
 import co.andrescol.mc.plugin.turtleresetworld.runnable.orchestrator.OrchestratorLoadSchematicsRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -21,7 +21,7 @@ public class TurtleResetWorldPlugin extends APlugin {
 	public void onEnable() {
 		this.getCommand("turtle").setExecutor(new TurtleResetWorldCommand());
 		if (this.getConfig().getBoolean("safeOfSuffocation.enable")) {
-			AntiSuffocationPLayerJoinListener listener = new AntiSuffocationPLayerJoinListener();
+			AntiSuffocationPlayerJoinListener listener = new AntiSuffocationPlayerJoinListener();
 			this.getServer().getPluginManager().registerEvents(listener, this);
 		}
 		RegenerationDataManager dataManager = RegenerationDataManager.getInstance();

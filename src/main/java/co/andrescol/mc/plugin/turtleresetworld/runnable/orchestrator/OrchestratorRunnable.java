@@ -116,10 +116,8 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         plugin.info("Stats: min: {}ms, max: {}ms, mean: {}ms, desvstand: {}ms, median: {}ms",
                 min, max, mean, desvstand, median);
 
-        this.minimumTimeout = median;
-        this.maximumTimeout = max - this.minimumTimeout > mean
-                ? this.minimumTimeout + desvstand
-                : max + desvstand;
+        this.minimumTimeout = median + desvstand;
+        this.maximumTimeout = results.get((int) (results.size() * 0.75));
     }
 
     protected void controlTimeoutOut() throws InterruptedException {

@@ -4,7 +4,6 @@ import co.andrescol.mc.library.configuration.ALanguage;
 import co.andrescol.mc.library.plugin.APlugin;
 import co.andrescol.mc.library.utils.AUtils;
 import co.andrescol.mc.plugin.turtleresetworld.data.RegenerationDataManager;
-import co.andrescol.mc.plugin.turtleresetworld.data.WorldRegenerationData;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -13,7 +12,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-public class AntiSuffocationPLayerJoinListener implements Listener {
+import java.util.Objects;
+
+public class AntiSuffocationPlayerJoinListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
@@ -21,12 +22,8 @@ public class AntiSuffocationPLayerJoinListener implements Listener {
 
         RegenerationDataManager dataManager = RegenerationDataManager
                 .getInstance();
-        WorldRegenerationData data = dataManager.getDataOf(event.getPlayer().getWorld());
-
-        long lastRegen = data.getLastRegeneration();
-        long lastLogout = event.getPlayer().getLastPlayed();
-
-        if (lastLogout < lastRegen) {
+        String nick = event.getPlayer().getName();
+        if(!dataManager.isTeleportedPlayer(nick)) {
             FileConfiguration configuration = plugin.getConfig();
             Location teleport = this.getTeleportLocation(configuration);
             if (teleport != null) {
@@ -37,8 +34,9 @@ public class AntiSuffocationPLayerJoinListener implements Listener {
                             lastLocationPlayer.getBlockX(),
                             lastLocationPlayer.getBlockY(),
                             lastLocationPlayer.getBlockZ(),
-                            lastLocationPlayer.getWorld().getName());
+                            Objects.requireNonNull(lastLocationPlayer.getWorld()).getName());
                     AUtils.sendMessage(event.getPlayer(), message);
+                    dataManager.addTeleportedPlayer(nick);
                 }
             }
         }

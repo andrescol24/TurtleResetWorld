@@ -61,6 +61,7 @@ public class OrchestratorLoadSchematicsRunnable extends OrchestratorRunnable {
                 dataManager.setContinueLoading(false);
                 File schematicsFolder = new File(plugin.getDataFolder(), "schematics");
                 this.deleteFolder(schematicsFolder);
+                dataManager.clearTeleportedPlayerList();
                 UnRegisterEventRunnable unRegisterEventRunnable = new UnRegisterEventRunnable(listener);
                 unRegisterEventRunnable.runTask(plugin);
             }

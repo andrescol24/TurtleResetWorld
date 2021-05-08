@@ -18,8 +18,10 @@ import java.util.*;
 public class RegenerationDataManager {
 
     private static final String CONTINUE_LOADING_KEY = "continueLoading";
+    private static final String TELEPORTED_PLAYERS = "teleportedPlayers";
 
     private HashMap<String, WorldRegenerationData> chunksData;
+    private List<String> teleportedPlayers;
     private boolean continueLoading;
     private final String fileName;
 
@@ -81,16 +83,26 @@ public class RegenerationDataManager {
         this.saveData();
     }
 
+    /**
+     * Set the flag to continue loading chunks or not
+     *
+     * @param continueLoading boolean
+     */
     public void setContinueLoading(boolean continueLoading) {
         this.continueLoading = continueLoading;
         this.saveData();
     }
 
+    /**
+     * Get the list of worlds that they have chunks pending to lead
+     *
+     * @return List of worlds with chunks pending to lead
+     */
     public List<World> getListWorldsPending() {
         List<World> worlds = new LinkedList<>();
-        for(String key : this.chunksData.keySet()) {
+        for (String key : this.chunksData.keySet()) {
             WorldRegenerationData data = this.chunksData.get(key);
-            if(!data.getChunksToLoadSchematic().isEmpty()) {
+            if (!data.getChunksToLoadSchematic().isEmpty()) {
                 World world = Bukkit.getWorld(key);
                 worlds.add(world);
             }
@@ -98,10 +110,39 @@ public class RegenerationDataManager {
         return worlds;
     }
 
-    public void readData() {
+    /**
+     * Checks if the player with that name has been teleport
+     *
+     * @param name the nick of the player
+     * @return true if the player already has been teleport
+     */
+    public boolean isTeleportedPlayer(String name) {
+        return this.teleportedPlayers.contains(name);
+    }
+
+    /**
+     * Add the nick of the player to the list of teleported players
+     *
+     * @param name nick of the player
+     */
+    public void addTeleportedPlayer(String name) {
+        this.teleportedPlayers.add(name);
+        this.saveData();
+    }
+
+    /**
+     * Clear the list of teleported players
+     */
+    public void clearTeleportedPlayerList() {
+        this.teleportedPlayers.clear();
+        this.saveData();
+    }
+
+    private void readData() {
         APlugin plugin = APlugin.getInstance();
         HashMap<String, WorldRegenerationData> data = new HashMap<>();
         boolean continueLoading = false;
+        List<String> teleportedPlayers = new LinkedList<>();
         File file = new File(plugin.getDataFolder(), this.fileName);
         if (file.exists()) {
             try {
@@ -109,8 +150,10 @@ public class RegenerationDataManager {
                 yaml.load(file);
                 Set<String> keys = yaml.getKeys(false);
                 for (String key : keys) {
-                    if(key.equals(CONTINUE_LOADING_KEY)) {
+                    if (key.equals(CONTINUE_LOADING_KEY)) {
                         continueLoading = yaml.getBoolean(CONTINUE_LOADING_KEY);
+                    } else if (key.equals(TELEPORTED_PLAYERS)) {
+                        teleportedPlayers = yaml.getStringList(TELEPORTED_PLAYERS);
                     } else {
                         ConfigurationSection section = yaml.getConfigurationSection(key);
                         WorldRegenerationData worldData = section == null
@@ -124,6 +167,7 @@ public class RegenerationDataManager {
         }
         this.chunksData = data;
         this.continueLoading = continueLoading;
+        this.teleportedPlayers = teleportedPlayers;
     }
 
     public boolean isContinueLoading() {
@@ -165,6 +209,7 @@ public class RegenerationDataManager {
                 yaml.set(key, this.chunksData.get(key).toHashMap());
             }
             yaml.set(CONTINUE_LOADING_KEY, this.continueLoading);
+            yaml.set(TELEPORTED_PLAYERS, this.teleportedPlayers);
             yaml.save(file);
         } catch (IOException e) {
             plugin.error("The data could not be saved", e);
