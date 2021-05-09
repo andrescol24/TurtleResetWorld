@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -16,16 +17,14 @@ import java.util.Objects;
 
 public class AntiSuffocationPlayerJoinListener implements Listener {
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         APlugin plugin = APlugin.getInstance();
-
         RegenerationDataManager dataManager = RegenerationDataManager
                 .getInstance();
         String nick = event.getPlayer().getName();
         if(!dataManager.isTeleportedPlayer(nick)) {
-            FileConfiguration configuration = plugin.getConfig();
-            Location teleport = this.getTeleportLocation(configuration);
+            Location teleport = this.getTeleportLocation(plugin.getConfig());
             if (teleport != null) {
                 Location lastLocationPlayer = event.getPlayer().getLocation();
                 boolean teleported = event.getPlayer().teleport(teleport);
