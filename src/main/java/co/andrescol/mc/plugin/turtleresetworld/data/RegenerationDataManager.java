@@ -230,4 +230,8 @@ public class RegenerationDataManager {
         }
         return instance;
     }
+
+    public static void clearInstance() {
+        instance = null;
+    }
 }

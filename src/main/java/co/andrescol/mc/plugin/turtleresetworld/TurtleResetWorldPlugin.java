@@ -37,6 +37,7 @@ public class TurtleResetWorldPlugin extends APlugin {
 	public void onDisable() {
 		HandlerList.unregisterAll(this);
 		this.getServer().getScheduler().cancelTasks(this);
+		RegenerationDataManager.clearInstance();
 	}
 
 	/**
