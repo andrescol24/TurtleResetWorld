@@ -91,6 +91,14 @@ public class RegionInFile {
     }
 
     /**
+     * Delete the file
+     * @return true or false if the file was deleted
+     */
+    public boolean deleteFile() {
+        return this.file.delete();
+    }
+
+    /**
      * Read the region file
      *
      * @param protectedChunksWorld List of the protected chunks in the world of this region

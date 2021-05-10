@@ -62,6 +62,18 @@ public class WorldFilesProcess {
         }
     }
 
+    public void deleteRegionsFile() {
+        APlugin plugin = APlugin.getInstance();
+        for (RegionInFile region : this.regions) {
+            boolean deleted = region.deleteFile();
+            if (deleted) {
+                plugin.info("{} file was deleted", region);
+            } else {
+                plugin.warn("{} file was not deleted", region);
+            }
+        }
+    }
+
     public void deleteBackupFolder() {
         String path = "backup" + File.separator + worldName;
         File folder = new File(APlugin.getInstance().getDataFolder(),path);

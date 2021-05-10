@@ -1,13 +1,25 @@
-version: 1.0.0
+# ========================================================================================================
+#                                       TurtleResetWorld Configuration
+# Hello, It's my first commercial plugin, use and enjoy it. This is the configuration explanation:
+#
+# safeOfSuffocation: Mean to save players of suffocation dead after a map regeneration. There may be login or pre join
+#  validation plugins which affect this function so be careful and prepare your players for the regeneration before.
+#  After join the player will be teleported to the position specified
+#
+# minYProtected: In the Minecraft version 1.17 the lower height will be -64Y so with this configuration you can protect
+#  claims from a variable height
+#
+# enableBackup: This plugin delete the region files, with true those files will be moved to the
+#  TurtleResetWorld/backup/worldName folder instead of being deleted
+# ========================================================================================================
 safeOfSuffocation:
   enable: true
   position:
     x: 0
-    y: 80
+    y: 81
     z: 0
     yaw: 0
     pitch: 0
     world: world
 minYProtected: 0
-maximumServerTimeOut: 35
-minimumServerTimeOut: 6
+enableBackup: true
