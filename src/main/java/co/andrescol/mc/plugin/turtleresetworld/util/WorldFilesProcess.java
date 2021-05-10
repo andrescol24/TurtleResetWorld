@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class WorldFilesProcess {
 
     private List<RegionInFile> regions;
+    private String worldName;
 
     /**
      * create an instance of the world
@@ -24,6 +25,7 @@ public class WorldFilesProcess {
     public WorldFilesProcess(World worldToRegen) {
         APlugin plugin = APlugin.getInstance();
         try {
+            this.worldName = worldToRegen.getName();
             this.regions = this.getRegionsInWorldFolder(worldToRegen);
         } catch (Exception e) {
             this.regions = new LinkedList<>();
@@ -44,15 +46,31 @@ public class WorldFilesProcess {
         return chunks;
     }
 
-    public void deleteAllRegionsFile() {
+    /**
+     * Move all region files to the backup/world/ plugin directory
+     */
+    public void moveAllRegionsFile() {
         APlugin plugin = APlugin.getInstance();
+        plugin.info("Moving {} region files", this.worldName);
         for (RegionInFile region : this.regions) {
-            boolean deleted = region.deleteFile();
-            if (deleted) {
-                plugin.info("{} file was deleted", region);
+            boolean moved = region.moveFile(this.worldName);
+            if (moved) {
+                plugin.info("{} file was moved", region);
             } else {
-                plugin.warn("{} file was not deleted", region);
+                plugin.warn("{} file was not moved", region);
             }
+        }
+    }
+
+    public void deleteBackupFolder() {
+        String path = "backup" + File.separator + worldName;
+        File folder = new File(APlugin.getInstance().getDataFolder(),path);
+        if(folder.exists()) {
+            APlugin.getInstance().info("Deleting {} folder", path);
+            for(File file : Objects.requireNonNull(folder.listFiles())) {
+                file.delete();
+            }
+            folder.delete();
         }
     }
 

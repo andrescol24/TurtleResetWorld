@@ -6,6 +6,7 @@ import org.bukkit.Chunk;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,25 +60,6 @@ public class RegionInFile {
     }
 
     /**
-     * Check if in this region there are claimed chunks
-     *
-     * @return true if there are claimed chunks
-     */
-    public boolean hasClaimedChunks() {
-        return this.chunksInFile.stream().anyMatch(ChunkInFile::isProtectedChunk);
-    }
-
-    /**
-     * Get the list of unclaimed chunks
-     *
-     * @return List of chunks unclaimed
-     */
-    public List<ChunkInFile> getUnclaimedChunks() {
-        return this.chunksInFile.stream()
-                .filter(chunk -> !chunk.isProtectedChunk()).collect(Collectors.toList());
-    }
-
-    /**
      * Get the list of claimed chunks
      *
      * @return list of claimed chunks
@@ -88,12 +70,24 @@ public class RegionInFile {
     }
 
     /**
-     * Deletes the region file
+     * Move this region file to the plugin folder
      *
      * @return true if the region file was deleted
      */
-    public boolean deleteFile() {
-        return this.file.delete();
+    public boolean moveFile(String world) {
+        APlugin plugin = APlugin.getInstance();
+        String fileName = "backup" + File.separator + world;
+        File folderBackup = new File(plugin.getDataFolder(), fileName);
+        try {
+            folderBackup.mkdirs();
+            File fileBackup = new File(folderBackup, this.file.getName());
+            Files.move(this.file.toPath(), fileBackup.toPath());
+            return true;
+        } catch (IOException e) {
+            plugin.error("could not move file {} to {}",
+                    e, this.file.getAbsoluteFile(), folderBackup.getAbsolutePath());
+            return false;
+        }
     }
 
     /**

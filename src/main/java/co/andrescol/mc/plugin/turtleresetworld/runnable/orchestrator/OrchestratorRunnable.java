@@ -22,7 +22,7 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
     protected final Condition condition;
     protected Integer totalChunks;
     private long maximumTimeout;
-    private long minimumTimeout;
+    private long continueWith;
 
     protected OrchestratorRunnable() {
         this.lock = new ReentrantLock();
@@ -116,24 +116,30 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         plugin.info("Stats: min: {}ms, max: {}ms, mean: {}ms, desvstand: {}ms, median: {}ms",
                 min, max, mean, desvstand, median);
 
-        this.minimumTimeout = median + desvstand;
-        this.maximumTimeout = results.get((int) (results.size() * 0.75));
+        this.continueWith = median + desvstand;
+        this.maximumTimeout = results.get((int) (results.size() * 0.75)) - desvstand;
     }
 
+    /**
+     * Control the server performance. It's going to run the tim checker
+     * and verifies if the server's tps are behind to normal
+     *
+     * @throws InterruptedException
+     */
     protected void controlTimeoutOut() throws InterruptedException {
         APlugin plugin = APlugin.getInstance();
         long total = this.runTimeChecker();
         if (total > this.maximumTimeout) {
-            while (total > this.minimumTimeout) {
+            while (total > this.continueWith) {
                 plugin.warn("Waiting 10s to improve the server performance: " +
                                 "[actual: {}ms, allowed: {}ms, continue with: {}ms]",
-                        total, this.maximumTimeout, this.minimumTimeout);
+                        total, this.maximumTimeout, this.continueWith);
                 Thread.sleep(10000);
                 total = this.runTimeChecker();
             }
         }
         plugin.info("command tps ticks [actual: {}ms, allowed: {}ms, continue with: {}ms]", total,
-                this.maximumTimeout, this.minimumTimeout);
+                this.maximumTimeout, this.continueWith);
     }
 
     /**

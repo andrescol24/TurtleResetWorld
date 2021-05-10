@@ -14,6 +14,7 @@ public class TurtleResetWorldCommand extends AMainCommand {
 		this.addSubCommand(new RegenSubCommand());
 		this.addSubCommand(new HookListSubCommand());
 		this.addSubCommand(new TpsSubCommand());
+		this.addSubCommand(new TpSubCommand());
 	}
 
 	@Override

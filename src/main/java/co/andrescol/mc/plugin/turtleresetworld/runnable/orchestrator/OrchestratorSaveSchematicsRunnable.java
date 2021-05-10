@@ -73,7 +73,8 @@ public class OrchestratorSaveSchematicsRunnable extends OrchestratorRunnable {
 
             // Delete all region files and set for continue with loading schematics
             if (success) {
-                processes.forEach(WorldFilesProcess::deleteAllRegionsFile);
+                processes.forEach(WorldFilesProcess::deleteBackupFolder);
+                processes.forEach(WorldFilesProcess::moveAllRegionsFile);
                 dataManager.setContinueLoading(true);
             }
 
