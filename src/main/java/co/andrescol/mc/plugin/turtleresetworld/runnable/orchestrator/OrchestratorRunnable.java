@@ -60,7 +60,7 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         List<T> executables = new LinkedList<>();
         ConcurrentLinkedDeque<ChunkInFile> chunksSplit = new ConcurrentLinkedDeque<>();
         int i = 0;
-        int splitSize = 10;
+        int splitSize = 7;
         for (ChunkInFile chunkInFile : chunks) {
             chunksSplit.add(chunkInFile);
             if (i < splitSize - 1) {
@@ -116,7 +116,7 @@ public abstract class OrchestratorRunnable extends BukkitRunnable {
         plugin.info("Stats: min: {}ms, max: {}ms, mean: {}ms, desvstand: {}ms, median: {}ms",
                 min, max, mean, desvstand, median);
 
-        this.continueWith = median + desvstand;
+        this.continueWith = Math.min(mean, median) + desvstand;
         this.maximumTimeout = results.get((int) (results.size() * 0.75)) - desvstand;
     }
 
